@@ -31,7 +31,7 @@ export default function ProfilePage() {
         } else {
             router.push("/login");
         }
-    }, [router]);
+    }, [user]);
 
     const handleLogout = () => {
         logout();
