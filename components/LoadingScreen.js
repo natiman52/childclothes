@@ -44,7 +44,7 @@ export default function LoadingScreen() {
             className="fixed inset-0 z-[999] bg-foreground flex items-center justify-center pointer-events-none"
         >
             <div ref={textRef} className="text-white text-4xl md:text-6xl font-heading font-black tracking-tighter">
-                de bébé
+                ሰላም ልብስ
             </div>
         </div>
     );

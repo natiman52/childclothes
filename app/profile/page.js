@@ -5,15 +5,15 @@ import { User, Package, MapPin, Settings, LogOut, ChevronRight } from "lucide-re
 import Link from "next/link";
 
 const dummyUser = {
-    name: "Sarah Johnson",
-    phone: "+1 (708) 555-0123",
+    name: "Abebe Kebede",
+    phone: "+251 91 111 2222",
     orders: [
-        { id: "ORD-7234", date: "Feb 15, 2026", status: "Delivered", total: "$84.00", items: 3 },
-        { id: "ORD-9102", date: "Jan 28, 2026", status: "Delivered", total: "$126.50", items: 5 },
-        { id: "ORD-1156", date: "Jan 10, 2026", status: "Delivered", total: "$45.00", items: 2 }
+        { id: "ORD-ET-7234", date: "Feb 15, 2026", status: "Delivered", total: "ETB 4500.00", items: 3 },
+        { id: "ORD-ET-9102", date: "Jan 28, 2026", status: "Delivered", total: "ETB 6800.50", items: 5 },
+        { id: "ORD-ET-1156", date: "Jan 10, 2026", status: "Delivered", total: "ETB 2400.00", items: 2 }
     ],
     addresses: [
-        { id: 1, type: "Default Shipping", street: "123 Maple Avenue", city: "Oak Park", state: "IL", zip: "60302" }
+        { id: 1, type: "Default Shipping", street: "Bole Road, House #456", city: "Addis Ababa", state: "Addis", zip: "1000" }
     ]
 };
 

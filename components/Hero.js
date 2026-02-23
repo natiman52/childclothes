@@ -90,7 +90,7 @@ export default function Hero() {
                         className="absolute top-10 right-0 md:right-10 bg-foreground text-white p-6 rounded-3xl shadow-2xl rotate-12 hidden lg:block z-20"
                     >
                         <p className="text-sm font-bold opacity-80 mb-1 tracking-tight">Summer Favorites</p>
-                        <p className="text-3xl font-black">$32.00</p>
+                        <p className="text-3xl font-black">ETB 1500</p>
                     </div>
 
                     {/* Subtle decorative circles */}

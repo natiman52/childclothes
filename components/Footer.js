@@ -15,7 +15,7 @@ export default function Footer() {
                     </div>
                     <div className="flex flex-col items-center text-center">
                         <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-4">Customer support</h3>
-                        <p className="text-xl font-heading font-bold">(708) 638-5584</p>
+                        <p className="text-xl font-heading font-bold">+251 91 123 4567</p>
                     </div>
                     <div className="flex flex-col items-center md:items-end text-center md:text-right">
                         <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-4">Looking for our products?</h3>
@@ -30,7 +30,7 @@ export default function Footer() {
                     {/* Brand Section */}
                     <div className="flex flex-col items-center md:items-start text-center md:text-left">
                         <Link href="/" className="text-3xl font-heading font-black tracking-tighter text-foreground mb-4">
-                            de bébé
+                            ሰላም ልብስ
                         </Link>
                         <p className="text-muted-foreground mb-6">
                             Premium kids clothing designed for comfort and style. Every piece is crafted with love for your little ones.
@@ -80,14 +80,14 @@ export default function Footer() {
                         </form>
                         <div className="text-sm">
                             <p className="font-bold">Contact:</p>
-                            <p className="text-muted-foreground">(708) 638-5584</p>
-                            <p className="text-muted-foreground">hello@debebe.com</p>
+                            <p className="text-muted-foreground">+251 91 123 4567</p>
+                            <p className="text-muted-foreground">hello@selamlibs.com</p>
                         </div>
                     </div>
                 </div>
 
                 <div className="pt-8 border-t border-secondary flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-                    <p>© {new Date().getFullYear()} De Bébé. All rights reserved.</p>
+                    <p>© {new Date().getFullYear()} ሰላም ልብስ. All rights reserved.</p>
                     <div className="flex gap-6">
                         <Link href="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
                         <Link href="/terms" className="hover:text-primary transition-colors">Terms</Link>

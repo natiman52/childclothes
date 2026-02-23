@@ -70,7 +70,7 @@ export default function ProductCard({ id, name, price, image, category }) {
                 <h3 className="text-xl font-heading font-bold text-foreground mb-1 transition-colors group-hover:text-primary">
                     <Link href={`/product/${id}`}>{name}</Link>
                 </h3>
-                <p className="text-2xl font-black text-foreground">${price.toFixed(2)}</p>
+                <p className="text-2xl font-black text-foreground">ETB {price.toFixed(2)}</p>
             </div>
         </div>
     );

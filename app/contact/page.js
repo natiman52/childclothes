@@ -43,7 +43,7 @@ export default function ContactPage() {
                                         </div>
                                         <div>
                                             <p className="font-bold mb-1">Phone</p>
-                                            <p className="text-muted-foreground text-sm">(708) 638-5584</p>
+                                            <p className="text-muted-foreground text-sm">+251 91 123 4567</p>
                                         </div>
                                     </div>
                                     <div className="flex gap-4">
@@ -52,7 +52,7 @@ export default function ContactPage() {
                                         </div>
                                         <div>
                                             <p className="font-bold mb-1">Email</p>
-                                            <p className="text-muted-foreground text-sm">hello@debebe.com</p>
+                                            <p className="text-muted-foreground text-sm">hello@selamlibs.com</p>
                                         </div>
                                     </div>
                                     <div className="flex gap-4">
@@ -61,7 +61,7 @@ export default function ContactPage() {
                                         </div>
                                         <div>
                                             <p className="font-bold mb-1">Office</p>
-                                            <p className="text-muted-foreground text-sm">123 Maple Avenue<br />Oak Park, IL 60302</p>
+                                            <p className="text-muted-foreground text-sm">Bole Road, Addis Ababa<br />Ethiopia</p>
                                         </div>
                                     </div>
                                     <div className="flex gap-4">

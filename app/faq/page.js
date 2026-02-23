@@ -17,7 +17,7 @@ const faqs = [
             },
             {
                 question: "Do you ship internationally?",
-                answer: "Currently, we ship within the United States. We are working on expanding our reach to international customers soon!"
+                answer: "Currently, we ship within Ethiopia. We are working on expanding our reach to international customers soon!"
             }
         ]
     },

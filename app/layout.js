@@ -12,8 +12,8 @@ const outfit = Outfit({
 });
 
 export const metadata = {
-  title: "De Bebe | Premium Kids Clothes",
-  description: "Playful and high-quality clothing for your little ones.",
+  title: "ሰላም ልብስ - Premium Kids Clothing",
+  description: "ሰላም ልብስ provides the highest quality, most comfortable clothing for your little ones in Ethiopia.",
 };
 
 import Navbar from "@/components/Navbar";

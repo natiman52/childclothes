@@ -19,10 +19,10 @@ const FEATURED_CATEGORIES = [
 ];
 
 const MOCK_PRODUCTS = [
-  { id: "1", name: "Waffle Textured Plush Set", price: 14.99, category: "Baby Boy", image: "/images/todler 2.jpg" },
-  { id: "2", name: "Ribbed Jogging Set", price: 18.50, category: "Baby Girl", image: "/images/todler 1.jpg" },
-  { id: "3", name: "Purl Knit Dungarees", price: 15.99, category: "Boys", image: "/images/kid 2.jpg" },
-  { id: "4", name: "Cotton Jersey Top", price: 9.99, category: "Girls", image: "/images/kid 1.jpg" },
+  { id: "1", name: "Waffle Textured Plush Set", price: 350, category: "Baby Boy", image: "/images/todler 2.jpg" },
+  { id: "2", name: "Ribbed Jogging Set", price: 400, category: "Baby Girl", image: "/images/todler 1.jpg" },
+  { id: "3", name: "Purl Knit Dungarees", price: 450, category: "Boys", image: "/images/kid 2.jpg" },
+  { id: "4", name: "Cotton Jersey Top", price: 250, category: "Girls", image: "/images/kid 1.jpg" },
 ];
 
 export default function Home() {
@@ -81,7 +81,7 @@ export default function Home() {
       {/* Categories Section */}
       <section ref={categoriesRef} className="py-20 bg-white">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-2">De Bebe</p>
+          <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-2">ሰላም ልብስ</p>
           <h2 className="text-4xl md:text-5xl font-heading font-black mb-12">Shop by category</h2>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
@@ -142,7 +142,7 @@ export default function Home() {
             <div className="space-y-4">
               <div className="text-5xl mb-6">📦</div>
               <h3 className="text-2xl font-heading font-bold">Free shipping</h3>
-              <p className="text-muted-foreground leading-relaxed">For all orders over $100.00</p>
+              <p className="text-muted-foreground leading-relaxed">For all orders over ETB 5000</p>
             </div>
             <div className="space-y-4">
               <div className="text-5xl mb-6">💌</div>

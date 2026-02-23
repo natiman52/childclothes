@@ -70,7 +70,7 @@ export default function CartDrawer() {
                                             <h3 className="font-heading font-bold text-lg mb-1 group-hover:text-primary transition-colors line-clamp-1">{item.name}</h3>
                                             <p className="text-muted-foreground font-medium mb-2">{item.category}</p>
                                             <div className="flex items-center justify-between">
-                                                <span className="font-black">${item.price.toFixed(2)} x {item.quantity}</span>
+                                                <span className="font-black">ETB {item.price.toFixed(2)} x {item.quantity}</span>
                                                 <button
                                                     onClick={() => removeFromCart(item.id)}
                                                     className="text-muted-foreground hover:text-destructive p-2 hover:bg-red-50 rounded-lg transition-all"
@@ -94,7 +94,7 @@ export default function CartDrawer() {
                             </div>
                             <div className="flex justify-between items-center pt-2">
                                 <span className="text-xl font-heading font-bold">Total</span>
-                                <span className="text-3xl font-black text-primary">${cartTotal.toFixed(2)}</span>
+                                <span className="text-3xl font-black text-primary">ETB {cartTotal.toFixed(2)}</span>
                             </div>
                         </div>
                         <Link href="/checkout/success" onClick={() => setIsCartOpen(false)}>
@@ -106,7 +106,7 @@ export default function CartDrawer() {
                             </button>
                         </Link>
                         <p className="text-center text-[10px] uppercase font-bold tracking-widest text-muted-foreground mt-4">
-                            Free shipping on orders over $100
+                            Free shipping on orders over ETB 5000
                         </p>
                     </div>
                 </div>

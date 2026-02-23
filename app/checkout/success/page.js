@@ -32,7 +32,7 @@ export default function CheckoutSuccessPage() {
                 <div className="bg-secondary p-8 rounded-[2.5rem] space-y-4">
                     <div className="flex justify-between font-bold">
                         <span>Order Number</span>
-                        <span className="text-foreground">#DB-2026-X891</span>
+                        <span className="text-foreground">#SL-2026-X891</span>
                     </div>
                     <div className="flex justify-between font-bold">
                         <span>Estimated Delivery</span>
