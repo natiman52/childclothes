@@ -1,31 +1,92 @@
-"use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import { ChevronLeft, Plus, Minus, Star, Heart, Share2, ShoppingBag } from "lucide-react";
+import { ChevronLeft, Plus, Minus, Star, Heart, Share2, ShoppingBag, Send } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import Link from "next/link";
-import { ALL_PRODUCTS } from "@/lib/utils";
+
 export default function ProductDetailPage() {
     const { id } = useParams();
     const router = useRouter();
     const { addToCart } = useCart();
+
+    const [product, setProduct] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState(1);
     const [activeTab, setActiveTab] = useState("description");
+    const [selectedVariation, setSelectedVariation] = useState(null);
+    const [selectedImage, setSelectedImage] = useState(0);
+    const [user, setUser] = useState(null);
 
-    const product = ALL_PRODUCTS.find((p) => p.id === id);
+    // Review/Question form states
+    const [newRating, setNewRating] = useState({ stars: 5, comment: "" });
+    const [newQuestion, setNewQuestion] = useState("");
 
-    const reviews = [
-        { id: 1, user: "Elena M.", rating: 5, date: "Feb 10, 2026", comment: "The quality is amazing! The fabric is so soft for my baby's skin. Definitely worth the price." },
-        { id: 2, user: "Mark R.", rating: 4, date: "Jan 25, 2026", comment: "Great fit and beautiful design. Shipping was a bit slow, but the product is excellent." },
-        { id: 3, user: "Sarah T.", rating: 5, date: "Jan 12, 2026", comment: "Absolutely love this set! It's even cuter in person. Will be buying more colors." }
-    ];
+    useEffect(() => {
+        const fetchProduct = async () => {
+            try {
+                const res = await fetch(`/api/products/${id}`);
+                const data = await res.json();
+                setProduct(data);
+                if (data.variations?.length > 0) {
+                    setSelectedVariation(data.variations[0]);
+                }
+            } catch (error) {
+                console.error("Error fetching product:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const questions = [
-        { id: 1, user: "Jessica W.", date: "Feb 05, 2026", question: "Is this item true to size?", answer: "Yes! Most customers find it fits perfectly. We recommend check the size chart if you're unsure." },
-        { id: 2, user: "David L.", date: "Jan 30, 2026", question: "What is the material composition?", answer: "This set is made from 100% organic waffle-weave cotton." }
-    ];
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) setUser(JSON.parse(storedUser));
+
+        fetchProduct();
+    }, [id]);
+
+    const handleAddRating = async () => {
+        if (!user) {
+            router.push(`/login?message=Please login to rate products`);
+            return;
+        }
+        try {
+            const res = await fetch(`/api/products/${id}/ratings`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ ...newRating, userId: user.id })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setProduct(prev => ({ ...prev, ratings: [data, ...prev.ratings] }));
+                setNewRating({ stars: 5, comment: "" });
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleAddQuestion = async () => {
+        if (!user) {
+            router.push(`/login?message=Please login to ask questions`);
+            return;
+        }
+        try {
+            const res = await fetch(`/api/products/${id}/questions`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: newQuestion, userId: user.id })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setProduct(prev => ({ ...prev, questions: [data, ...prev.questions] }));
+                setNewQuestion("");
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
 
     if (!product) {
         return (
@@ -35,6 +96,9 @@ export default function ProductDetailPage() {
             </div>
         );
     }
+
+    const currentPrice = parseFloat(product.basePrice) + (selectedVariation ? parseFloat(selectedVariation.additionalPrice) : 0);
+
 
     return (
         <div className="bg-white min-h-screen">
@@ -51,55 +115,72 @@ export default function ProductDetailPage() {
                     {/* Image Gallery */}
                     <div className="space-y-4">
                         <div className="aspect-square relative bg-[#f7f7f7] rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-sm">
-                            <Image
-                                src={product.image}
-                                alt={product.name}
-                                fill
-                                className="object-cover"
-                                priority
-                            />
+                            {product.images?.length > 0 ? (
+                                <Image
+                                    src={product.images[selectedImage].url}
+                                    alt={product.name}
+                                    fill
+                                    className="object-cover"
+                                    priority
+                                />
+                            ) : (
+                                <div className="w-full h-full bg-secondary flex items-center justify-center text-muted-foreground">No Image</div>
+                            )}
                         </div>
-                        {/* Thumbnails placeholder */}
-                        <div className="grid grid-cols-4 gap-4">
-                            {[1, 2, 3, 4].map((i) => (
-                                <div key={i} className="aspect-square bg-secondary rounded-xl md:rounded-2xl border-2 border-transparent hover:border-primary transition-all cursor-pointer overflow-hidden relative">
-                                    <Image src={product.image} alt="thumbnail" fill className="object-cover opacity-50 hover:opacity-100" />
+                        {/* Thumbnails */}
+                        <div className="grid grid-cols-5 gap-3">
+                            {product.images?.map((img, idx) => (
+                                <div
+                                    key={img.id}
+                                    onClick={() => setSelectedImage(idx)}
+                                    className={`aspect-square bg-secondary rounded-xl md:rounded-2xl border-2 transition-all cursor-pointer overflow-hidden relative ${selectedImage === idx ? 'border-primary' : 'border-transparent'}`}
+                                >
+                                    <Image src={img.url} alt="thumbnail" fill className="object-cover" />
                                 </div>
                             ))}
                         </div>
                     </div>
 
+
                     {/* Product Info */}
                     <div className="flex flex-col">
                         <div className="mb-6 md:mb-8">
-                            <p className="text-sm font-bold uppercase tracking-widest text-primary mb-2">{product.category}</p>
+                            <p className="text-sm font-bold uppercase tracking-widest text-primary mb-2">
+                                {product.categories?.map(c => c.name).join(", ")}
+                            </p>
                             <h1 className="text-3xl md:text-5xl font-heading font-black mb-4">{product.name}</h1>
                             <div className="flex items-center gap-4">
                                 <div className="flex text-yellow-500">
-                                    <Star size={18} fill="currentColor" />
-                                    <Star size={18} fill="currentColor" />
-                                    <Star size={18} fill="currentColor" />
-                                    <Star size={18} fill="currentColor" />
-                                    <Star size={18} className="text-secondary" fill="currentColor" />
+                                    {[...Array(5)].map((_, i) => (
+                                        <Star key={i} size={18} fill={i < Math.round(product.ratings?.reduce((acc, r) => acc + r.stars, 0) / product.ratings?.length || 0) ? "currentColor" : "none"} className={i < Math.round(product.ratings?.reduce((acc, r) => acc + r.stars, 0) / product.ratings?.length || 0) ? "" : "text-secondary"} />
+                                    ))}
                                 </div>
-                                <span className="text-sm text-muted-foreground font-medium">({reviews.length} Customer Reviews)</span>
+                                <span className="text-sm text-muted-foreground font-medium">({product.ratings?.length || 0} Customer Reviews)</span>
                             </div>
                         </div>
 
-                        <p className="text-2xl md:text-3xl font-black mb-6 md:mb-8">ETB {product.price.toFixed(2)}</p>
+                        <p className="text-2xl md:text-3xl font-black mb-6 md:mb-8">ETB {currentPrice.toFixed(2)}</p>
 
                         {/* Selection */}
                         <div className="space-y-6 md:space-y-8 mb-10 md:mb-12">
-                            <div>
-                                <h3 className="text-xs font-bold uppercase tracking-widest mb-4">Select Size</h3>
-                                <div className="flex flex-wrap gap-2 md:gap-3">
-                                    {['0-3M', '3-6M', '6-12M', '1-2Y', '2-3Y'].map((size) => (
-                                        <button key={size} className="w-14 h-10 md:w-16 md:h-12 flex items-center justify-center border-2 border-secondary rounded-xl font-bold hover:border-primary transition-all active:scale-95 text-sm md:text-base">
-                                            {size}
-                                        </button>
-                                    ))}
+                            {product.variations?.length > 0 && (
+                                <div>
+                                    <h3 className="text-xs font-bold uppercase tracking-widest mb-4">Select Variation</h3>
+                                    <div className="flex flex-wrap gap-2 md:gap-3">
+                                        {product.variations.map((v) => (
+                                            <button
+                                                key={v.id}
+                                                onClick={() => setSelectedVariation(v)}
+                                                className={`px-4 py-2 border-2 rounded-xl font-bold transition-all active:scale-95 text-sm md:text-base ${selectedVariation?.id === v.id ? 'border-primary bg-primary/5' : 'border-secondary'}`}
+                                            >
+                                                {v.size} {v.color && `- ${v.color}`}
+                                                {v.additionalPrice > 0 && ` (+${v.additionalPrice})`}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
+
 
                             <div className="flex items-center gap-4 md:gap-6">
                                 <div className="flex items-center bg-secondary rounded-2xl p-1">
@@ -119,12 +200,20 @@ export default function ProductDetailPage() {
                                 </div>
 
                                 <button
-                                    onClick={() => addToCart({ ...product, quantity })}
+                                    onClick={() => addToCart({
+                                        id: product.id,
+                                        name: product.name,
+                                        price: currentPrice,
+                                        image: product.images?.[0]?.url,
+                                        variation: selectedVariation,
+                                        quantity
+                                    })}
                                     className="flex-1 btn-primary py-4 md:py-5 rounded-2xl justify-center text-base md:text-lg shadow-xl shadow-primary/20"
                                 >
                                     <span className="hidden sm:inline">Add to cart</span>
                                     <ShoppingBag className="sm:hidden" size={24} />
                                 </button>
+
 
                                 <button className="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center border-2 border-secondary rounded-2xl hover:border-primary transition-all text-muted-foreground hover:text-primary">
                                     <Heart size={24} />
@@ -183,29 +272,61 @@ export default function ProductDetailPage() {
                             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
                                 <div className="flex justify-between items-center mb-10">
                                     <h3 className="text-2xl font-heading font-bold">What parents are saying</h3>
-                                    <button className="btn-primary py-2 px-6 text-sm">Write Review</button>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
                                     <div className="bg-secondary p-6 rounded-2xl text-center">
-                                        <p className="text-4xl font-black mb-2">4.8</p>
+                                        <p className="text-4xl font-black mb-2">
+                                            {(product.ratings?.reduce((acc, r) => acc + r.stars, 0) / product.ratings?.length || 0).toFixed(1)}
+                                        </p>
                                         <div className="flex justify-center text-yellow-500 mb-2">
-                                            <Star size={16} fill="currentColor" /><Star size={16} fill="currentColor" /><Star size={16} fill="currentColor" /><Star size={16} fill="currentColor" /><Star size={16} fill="currentColor" />
+                                            {[...Array(5)].map((_, i) => (
+                                                <Star key={i} size={16} fill={i < Math.round(product.ratings?.reduce((acc, r) => acc + r.stars, 0) / product.ratings?.length || 0) ? "currentColor" : "none"} />
+                                            ))}
                                         </div>
                                         <p className="text-sm font-bold text-muted-foreground">Average Rating</p>
                                     </div>
+
+                                    {/* Submisson form */}
+                                    <div className="md:col-span-2 bg-secondary/20 p-6 rounded-3xl space-y-4">
+                                        <div className="flex items-center gap-4">
+                                            <span className="font-bold">Rate:</span>
+                                            <div className="flex text-yellow-500">
+                                                {[1, 2, 3, 4, 5].map((s) => (
+                                                    <Star
+                                                        key={s}
+                                                        size={24}
+                                                        fill={s <= newRating.stars ? "currentColor" : "none"}
+                                                        className="cursor-pointer"
+                                                        onClick={() => setNewRating({ ...newRating, stars: s })}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-4">
+                                            <textarea
+                                                value={newRating.comment}
+                                                onChange={(e) => setNewRating({ ...newRating, comment: e.target.value })}
+                                                placeholder="Write your review..."
+                                                className="flex-1 bg-white border-none rounded-2xl p-4 outline-none ring-primary focus:ring-2"
+                                            />
+                                            <button onClick={handleAddRating} className="btn-primary w-12 h-12 rounded-2xl flex items-center justify-center p-0">
+                                                <Send size={20} />
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-                                {reviews.map((review) => (
+                                {product.ratings?.map((review) => (
                                     <div key={review.id} className="p-8 bg-secondary/30 rounded-[2rem] border border-secondary">
                                         <div className="flex justify-between items-start mb-4">
                                             <div>
-                                                <p className="font-heading font-black text-lg mb-1">{review.user}</p>
+                                                <p className="font-heading font-black text-lg mb-1">{review.user?.username || "Anonymous"}</p>
                                                 <div className="flex text-yellow-500 gap-1">
-                                                    {[...Array(review.rating)].map((_, i) => (
+                                                    {[...Array(review.stars)].map((_, i) => (
                                                         <Star key={i} size={14} fill="currentColor" />
                                                     ))}
                                                 </div>
                                             </div>
-                                            <span className="text-sm font-bold text-muted-foreground opacity-60">{review.date}</span>
+                                            <span className="text-sm font-bold text-muted-foreground opacity-60">{new Date(review.createdAt).toLocaleDateString()}</span>
                                         </div>
                                         <p className="text-muted-foreground text-lg leading-relaxed">{review.comment}</p>
                                     </div>
@@ -213,34 +334,49 @@ export default function ProductDetailPage() {
                             </div>
                         )}
 
+
                         {activeTab === "questions" && (
                             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
                                 <div className="flex justify-between items-center mb-10">
                                     <h3 className="text-2xl font-heading font-bold">Community Q&A</h3>
-                                    <button className="btn-primary py-2 px-6 text-sm">Ask Question</button>
                                 </div>
-                                {questions.map((q) => (
+
+                                {/* Ask Question Form */}
+                                <div className="bg-secondary/20 p-6 rounded-3xl flex gap-4">
+                                    <input
+                                        value={newQuestion}
+                                        onChange={(e) => setNewQuestion(e.target.value)}
+                                        placeholder="Ask a question..."
+                                        className="flex-1 bg-white border-none rounded-2xl p-4 outline-none ring-primary focus:ring-2 font-medium"
+                                    />
+                                    <button onClick={handleAddQuestion} className="btn-primary px-8 rounded-2xl">Ask</button>
+                                </div>
+
+                                {product.questions?.map((q) => (
                                     <div key={q.id} className="space-y-4">
                                         <div className="flex gap-4">
                                             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs">Q</div>
                                             <div className="flex-1">
-                                                <p className="font-bold text-lg mb-1">{q.question}</p>
+                                                <p className="font-bold text-lg mb-1">{q.text}</p>
                                                 <div className="flex gap-3 text-xs font-bold text-muted-foreground opacity-60">
-                                                    <span>{q.user}</span>
-                                                    <span>{q.date}</span>
+                                                    <span>{q.user?.username || "Anonymous"}</span>
+                                                    <span>{new Date(q.createdAt).toLocaleDateString()}</span>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="flex gap-4 pl-4 md:pl-8">
-                                            <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground font-black text-xs">A</div>
-                                            <p className="flex-1 text-muted-foreground leading-relaxed italic border-l-2 border-secondary pl-6">
-                                                {q.answer}
-                                            </p>
-                                        </div>
+                                        {q.answer && (
+                                            <div className="flex gap-4 pl-4 md:pl-8">
+                                                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground font-black text-xs">A</div>
+                                                <p className="flex-1 text-muted-foreground leading-relaxed italic border-l-2 border-secondary pl-6">
+                                                    {q.answer}
+                                                </p>
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>
                         )}
+
                     </div>
                 </div>
             </div>

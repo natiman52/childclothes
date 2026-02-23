@@ -1,25 +1,49 @@
-"use client"
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProductCard from "@/components/ProductCard";
 import { Filter, X, ChevronDown } from "lucide-react";
-import { ALL_PRODUCTS } from "@/lib/utils";
-
-const CATEGORIES = ["All Products", "Baby Boy", "Baby Girl", "Boys", "Girls"];
 
 export default function ShopPage() {
+    const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState("All Products");
-    const [priceRange, setPriceRange] = useState(500);
+    const [priceRange, setPriceRange] = useState(10000); // Higher default for ETB
     const [sortBy, setSortBy] = useState("Latest");
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [loading, setLoading] = useState(true);
 
-    const filteredProducts = ALL_PRODUCTS
-        .filter(p => selectedCategory === "All Products" || p.category === selectedCategory)
-        .filter(p => p.price <= priceRange)
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const [prodRes, catRes] = await Promise.all([
+                    fetch("/api/products"),
+                    fetch("/api/categories")
+                ]);
+                const prodData = await prodRes.json();
+                const catData = await catRes.json();
+                setProducts(prodData);
+                setCategories([{ id: "all", name: "All Products" }, ...catData]);
+            } catch (error) {
+                console.error("Error fetching shop data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, []);
+
+    const filteredProducts = products
+        .filter(p => {
+            if (selectedCategory === "All Products") return true;
+            return p.categories.some(c => c.name === selectedCategory);
+        })
+        .filter(p => p.basePrice <= priceRange)
         .sort((a, b) => {
-            if (sortBy === "Price: Low to High") return a.price - b.price;
-            if (sortBy === "Price: High to Low") return b.price - a.price;
-            return 0; // Default: Latest (stays same in mock)
+            if (sortBy === "Price: Low to High") return a.basePrice - b.basePrice;
+            if (sortBy === "Price: High to Low") return b.basePrice - a.basePrice;
+            return new Date(b.createdAt) - new Date(a.createdAt);
         });
+
 
     return (
         <div className="bg-white min-h-screen">
@@ -75,20 +99,21 @@ export default function ShopPage() {
                             <div>
                                 <h3 className="text-sm font-black uppercase tracking-widest text-primary mb-6">Categories</h3>
                                 <ul className="space-y-4">
-                                    {CATEGORIES.map(cat => (
-                                        <li key={cat}>
+                                    {categories.map(cat => (
+                                        <li key={cat.id}>
                                             <button
                                                 onClick={() => {
-                                                    setSelectedCategory(cat);
+                                                    setSelectedCategory(cat.name);
                                                     if (window.innerWidth < 1024) setIsFilterOpen(false);
                                                 }}
-                                                className={`transition-colors font-bold text-lg lg:text-base ${selectedCategory === cat ? 'text-foreground' : 'text-muted-foreground hover:text-primary'}`}
+                                                className={`transition-colors font-bold text-lg lg:text-base ${selectedCategory === cat.name ? 'text-foreground' : 'text-muted-foreground hover:text-primary'}`}
                                             >
-                                                {cat}
+                                                {cat.name}
                                             </button>
                                         </li>
                                     ))}
                                 </ul>
+
                             </div>
 
                             <div>
@@ -99,16 +124,17 @@ export default function ShopPage() {
                                 <input
                                     type="range"
                                     min="0"
-                                    max="500"
-                                    step="10"
+                                    max="10000"
+                                    step="100"
                                     value={priceRange}
                                     onChange={(e) => setPriceRange(parseInt(e.target.value))}
                                     className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
                                 />
                                 <div className="flex justify-between text-xs font-bold text-muted-foreground mt-4">
                                     <span>ETB 0</span>
-                                    <span>ETB 500</span>
+                                    <span>ETB 10,000</span>
                                 </div>
+
                             </div>
 
                             <button

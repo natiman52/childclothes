@@ -1,5 +1,6 @@
 "use client"
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
 import Link from "next/link";
 import { Search, Heart, User, ShoppingBag, Menu, X } from "lucide-react";
 import { useCart } from "@/context/CartContext";
@@ -8,6 +9,15 @@ import CartDrawer from "./CartDrawer";
 export default function Navbar() {
     const { cartCount, setIsCartOpen } = useCart();
     const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
+    }, []);
+
 
     return (
         <nav className="sticky top-0 z-50 bg-white border-b border-secondary">
@@ -40,9 +50,10 @@ export default function Navbar() {
                     <button className="p-2 hover:bg-secondary rounded-full border border-secondary transition-colors hidden md:block">
                         <Heart size={20} />
                     </button>
-                    <Link href="/login" className="p-2 hover:bg-secondary rounded-full border border-secondary transition-colors">
+                    <Link href={user ? "/profile" : "/login"} className="p-2 hover:bg-secondary rounded-full border border-secondary transition-colors">
                         <User size={20} />
                     </Link>
+
                     <button
                         onClick={() => setIsCartOpen(true)}
                         className="p-2 hover:bg-secondary rounded-full border border-secondary transition-colors relative"

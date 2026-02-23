@@ -1,6 +1,5 @@
-"use client";
-
-import { useEffect, useRef } from "react";
+"use client"
+import { useEffect, useRef, useState } from "react";
 import Hero from "@/components/Hero";
 import ProductCard from "@/components/ProductCard";
 import Link from "next/link";
@@ -8,7 +7,7 @@ import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ALL_PRODUCTS } from "@/lib/utils";
+
 gsap.registerPlugin(ScrollTrigger);
 
 const FEATURED_CATEGORIES = [
@@ -20,9 +19,24 @@ const FEATURED_CATEGORIES = [
 
 
 export default function Home() {
+  const [products, setProducts] = useState([]);
   const categoriesRef = useRef(null);
   const productsRef = useRef(null);
   const benefitsRef = useRef(null);
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const res = await fetch("/api/products");
+        const data = await res.json();
+        setProducts(data?.slice(0, 4));
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchFeatured();
+  }, []);
+
 
   useEffect(() => {
     const sections = [
@@ -117,10 +131,11 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {ALL_PRODUCTS.slice(0, 4).map((product) => (
+            {products.map((product) => (
               <ProductCard key={product.id} {...product} />
             ))}
           </div>
+
         </div>
       </section>
 

@@ -7,9 +7,12 @@ import { Plus } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import gsap from "gsap";
 
-export default function ProductCard({ id, name, price, image, category }) {
+export default function ProductCard({ id, name, basePrice, images, categories }) {
     const { addToCart } = useCart();
     const cardRef = useRef(null);
+
+    const mainImage = images?.[0]?.url;
+    const firstCategory = categories?.[0]?.name;
 
     const onMouseEnter = () => {
         gsap.to(cardRef.current, {
@@ -37,9 +40,9 @@ export default function ProductCard({ id, name, price, image, category }) {
             className="group bg-[#f7f7f7] rounded-[2rem] p-4 transition-colors hover:bg-white relative overflow-hidden"
         >
             <div className="aspect-square relative overflow-hidden rounded-3xl mb-4 bg-white/50">
-                {image ? (
+                {mainImage ? (
                     <Image
-                        src={image}
+                        src={mainImage}
                         alt={name}
                         fill
                         className="object-cover group-hover:scale-110 transition-transform duration-700"
@@ -57,7 +60,7 @@ export default function ProductCard({ id, name, price, image, category }) {
                 <button
                     onClick={(e) => {
                         e.preventDefault();
-                        addToCart({ id, name, price, image, category });
+                        addToCart({ id, name, price: basePrice, image: mainImage, category: firstCategory });
                     }}
                     className="absolute bottom-4 right-4 bg-primary text-white p-4 rounded-2xl shadow-lg opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all active:scale-90 z-20"
                 >
@@ -66,12 +69,13 @@ export default function ProductCard({ id, name, price, image, category }) {
             </div>
 
             <div className="px-2 pb-2">
-                <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-1">{category}</p>
+                <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-1">{firstCategory}</p>
                 <h3 className="text-xl font-heading font-bold text-foreground mb-1 transition-colors group-hover:text-primary">
                     <Link href={`/product/${id}`}>{name}</Link>
                 </h3>
-                <p className="text-2xl font-black text-foreground">ETB {price.toFixed(2)}</p>
+                <p className="text-2xl font-black text-foreground">ETB {parseFloat(basePrice).toFixed(2)}</p>
             </div>
         </div>
     );
 }
+

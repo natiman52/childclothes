@@ -56,8 +56,9 @@ export default function CartDrawer() {
                         ) : (
                             <ul className="space-y-6">
                                 {cart.map((item) => (
-                                    <li key={item.id} className="flex gap-4 group">
+                                    <li key={`${item.id}-${item.variation?.id || 'default'}`} className="flex gap-4 group">
                                         <div className="w-24 h-24 bg-secondary rounded-2xl flex-shrink-0 relative overflow-hidden border border-secondary shadow-sm">
+
                                             {item.image ? (
                                                 <Image src={item.image} alt={item.name} fill className="object-cover" />
                                             ) : (
@@ -68,12 +69,16 @@ export default function CartDrawer() {
                                         </div>
                                         <div className="flex-1 flex flex-col justify-center">
                                             <h3 className="font-heading font-bold text-lg mb-1 group-hover:text-primary transition-colors line-clamp-1">{item.name}</h3>
-                                            <p className="text-muted-foreground font-medium mb-2">{item.category}</p>
+                                            <p className="text-muted-foreground font-medium mb-1 line-clamp-1">
+                                                {item.category} {item.variation && `• ${item.variation.size} ${item.variation.color || ''}`}
+                                            </p>
+
                                             <div className="flex items-center justify-between">
-                                                <span className="font-black">ETB {item.price.toFixed(2)} x {item.quantity}</span>
+                                                <span className="font-black">ETB {(parseFloat(item.price) || 0).toFixed(2)} x {item.quantity}</span>
                                                 <button
-                                                    onClick={() => removeFromCart(item.id)}
+                                                    onClick={() => removeFromCart(item.id, item.variation?.id)}
                                                     className="text-muted-foreground hover:text-destructive p-2 hover:bg-red-50 rounded-lg transition-all"
+
                                                     title="Remove item"
                                                 >
                                                     <Trash2 size={18} />
@@ -97,7 +102,8 @@ export default function CartDrawer() {
                                 <span className="text-3xl font-black text-primary">ETB {cartTotal.toFixed(2)}</span>
                             </div>
                         </div>
-                        <Link href="/checkout/success" onClick={() => setIsCartOpen(false)}>
+                        <Link href="/checkout" onClick={() => setIsCartOpen(false)}>
+
                             <button
                                 className="w-full btn-primary justify-center text-lg py-5 rounded-2xl shadow-xl shadow-primary/20 transition-all hover:-translate-y-1"
                                 disabled={cart.length === 0}

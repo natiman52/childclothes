@@ -1,62 +1,113 @@
 "use client";
 
-import { useState } from "react";
-import { User, Package, MapPin, Settings, LogOut, ChevronRight } from "lucide-react";
-import Link from "next/link";
-
-const dummyUser = {
-    name: "Abebe Kebede",
-    phone: "+251 91 111 2222",
-    orders: [
-        { id: "ORD-ET-7234", date: "Feb 15, 2026", status: "Delivered", total: "ETB 4500.00", items: 3 },
-        { id: "ORD-ET-9102", date: "Jan 28, 2026", status: "Delivered", total: "ETB 6800.50", items: 5 },
-        { id: "ORD-ET-1156", date: "Jan 10, 2026", status: "Delivered", total: "ETB 2400.00", items: 2 }
-    ],
-    addresses: [
-        { id: 1, type: "Default Shipping", street: "Bole Road, House #456", city: "Addis Ababa", state: "Addis", zip: "1000" }
-    ]
-};
+import { useState, useEffect } from "react";
+import { User, Package, MapPin, Settings, LogOut, ChevronRight, Camera, Save, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
+    const [user, setUser] = useState(null);
     const [activeTab, setActiveTab] = useState("overview");
+    const [isEditing, setIsEditing] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
+    const router = useRouter();
+
+    const [editData, setEditData] = useState({
+        photo: "",
+        city: "",
+        subcity: "",
+        neighborhood: ""
+    });
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+            const parsedUser = JSON.parse(storedUser);
+            setUser(parsedUser);
+            setEditData({
+                photo: parsedUser.photo || "",
+                city: parsedUser.address?.city || "Addis Ababa",
+                subcity: parsedUser.address?.subcity || "Bole",
+                neighborhood: parsedUser.address?.neighborhood || ""
+            });
+        } else {
+            router.push("/login");
+        }
+    }, [router]);
+
+    const handleLogout = () => {
+        localStorage.removeItem("user");
+        router.push("/login");
+    };
+
+    const handleUpdateProfile = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError("");
+        setSuccess("");
+
+        try {
+            const res = await fetch("/api/user/update", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    userId: user.id,
+                    ...editData
+                })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                const updatedUser = { ...user, ...data.user };
+                localStorage.setItem("user", JSON.stringify(updatedUser));
+                setUser(updatedUser);
+                setSuccess("Profile updated successfully!");
+                setIsEditing(false);
+            } else {
+                setError(data.error || "Failed to update profile");
+            }
+        } catch (err) {
+            setError("Something went wrong. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (!user) return <div className="min-h-screen bg-secondary flex items-center justify-center font-bold">Loading...</div>;
 
     return (
         <div className="bg-secondary min-h-screen py-12 px-4">
             <div className="container mx-auto max-w-6xl">
-                <h1 className="text-3xl font-heading font-black mb-8 text-foreground">My Account</h1>
+                <div className="flex justify-between items-center mb-8">
+                    <h1 className="text-3xl font-heading font-black text-foreground">My Account</h1>
+                    {success && <div className="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-bold text-sm animate-bounce">{success}</div>}
+                    {error && <div className="bg-red-100 text-red-700 px-4 py-2 rounded-lg font-bold text-sm">{error}</div>}
+                </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                     {/* Sidebar */}
                     <aside className="lg:col-span-1 space-y-2">
                         <button
                             onClick={() => setActiveTab("overview")}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-colors ${activeTab === "overview" ? "bg-primary text-white" : "bg-white text-foreground hover:bg-white/80 border border-border"
-                                }`}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-colors ${activeTab === "overview" ? "bg-primary text-white" : "bg-white text-foreground hover:bg-white/80 border border-border"}`}
                         >
                             <User size={18} /> Overview
                         </button>
                         <button
                             onClick={() => setActiveTab("orders")}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-colors ${activeTab === "orders" ? "bg-primary text-white" : "bg-white text-foreground hover:bg-white/80 border border-border"
-                                }`}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-colors ${activeTab === "orders" ? "bg-primary text-white" : "bg-white text-foreground hover:bg-white/80 border border-border"}`}
                         >
                             <Package size={18} /> Orders
                         </button>
                         <button
                             onClick={() => setActiveTab("addresses")}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-colors ${activeTab === "addresses" ? "bg-primary text-white" : "bg-white text-foreground hover:bg-white/80 border border-border"
-                                }`}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold transition-colors ${activeTab === "addresses" ? "bg-primary text-white" : "bg-white text-foreground hover:bg-white/80 border border-border"}`}
                         >
                             <MapPin size={18} /> Addresses
                         </button>
-                        <button
-                            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold bg-white text-foreground hover:bg-white/80 border border-border transition-colors"
-                        >
-                            <Settings size={18} /> Settings
-                        </button>
-                        <button
-                            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold text-red-500 hover:bg-red-50 transition-colors border border-red-100"
-                        >
+                        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-bold text-red-500 hover:bg-red-50 transition-colors border border-red-100" onClick={handleLogout}>
                             <LogOut size={18} /> Sign Out
                         </button>
                     </aside>
@@ -67,86 +118,138 @@ export default function ProfilePage() {
                             <div className="space-y-6">
                                 {/* Profile Header */}
                                 <div className="bg-white p-8 rounded-xl border border-border shadow-sm flex flex-col md:flex-row items-center gap-6">
-                                    <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center text-primary">
-                                        <User size={48} strokeWidth={1.5} />
+                                    <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center text-primary overflow-hidden border-4 border-secondary">
+                                        {user.photo ? (
+                                            <img src={user.photo} alt={user.username} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <User size={48} strokeWidth={1.5} />
+                                        )}
                                     </div>
                                     <div className="text-center md:text-left flex-1">
-                                        <h2 className="text-2xl font-heading font-extrabold">{dummyUser.name}</h2>
-                                        <p className="text-muted-foreground">{dummyUser.phone}</p>
+                                        <h2 className="text-2xl font-heading font-extrabold">{user.username}</h2>
+                                        <p className="text-muted-foreground">{user.phone}</p>
                                         <div className="mt-4 flex flex-wrap justify-center md:justify-start gap-4">
-                                            <div className="px-4 py-2 bg-secondary rounded-full text-sm font-bold">3 Orders</div>
-                                            <div className="px-4 py-2 bg-secondary rounded-full text-sm font-bold">Bronze Member</div>
+                                            <div className="px-4 py-2 bg-secondary rounded-full text-sm font-bold">New Member</div>
+                                            <div className="px-4 py-2 bg-secondary rounded-full text-sm font-bold capitalize">{user.role}</div>
                                         </div>
                                     </div>
-                                    <button className="btn-primary py-2 px-6">Edit Profile</button>
+                                    <button
+                                        onClick={() => setIsEditing(true)}
+                                        className="btn-primary py-2 px-6"
+                                    >
+                                        Edit Profile
+                                    </button>
                                 </div>
+
+                                {isEditing && (
+                                    <div className="bg-white p-8 rounded-xl border-2 border-primary shadow-lg animate-in fade-in slide-in-from-top-4 duration-300">
+                                        <div className="flex justify-between items-center mb-6">
+                                            <h3 className="text-xl font-heading font-bold flex items-center gap-2">
+                                                <Settings className="text-primary" /> Update Profile Info
+                                            </h3>
+                                            <button onClick={() => setIsEditing(false)} className="text-muted-foreground hover:text-foreground">
+                                                <X size={24} />
+                                            </button>
+                                        </div>
+
+                                        <form onSubmit={handleUpdateProfile} className="space-y-4">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-bold text-muted-foreground flex items-center gap-2">
+                                                        <Camera size={16} /> Photo URL
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        value={editData.photo}
+                                                        onChange={(e) => setEditData({ ...editData, photo: e.target.value })}
+                                                        placeholder="https://example.com/photo.jpg"
+                                                        className="w-full bg-secondary border-none rounded-xl px-4 py-3 font-bold outline-none focus:ring-2 ring-primary transition-all"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-bold text-muted-foreground flex items-center gap-2">
+                                                        <MapPin size={16} /> City
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        value={editData.city}
+                                                        onChange={(e) => setEditData({ ...editData, city: e.target.value })}
+                                                        placeholder="City"
+                                                        className="w-full bg-secondary border-none rounded-xl px-4 py-3 font-bold outline-none focus:ring-2 ring-primary transition-all"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-bold text-muted-foreground flex items-center gap-2">
+                                                        <MapPin size={16} /> Subcity
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        value={editData.subcity}
+                                                        onChange={(e) => setEditData({ ...editData, subcity: e.target.value })}
+                                                        placeholder="Subcity"
+                                                        className="w-full bg-secondary border-none rounded-xl px-4 py-3 font-bold outline-none focus:ring-2 ring-primary transition-all"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-bold text-muted-foreground flex items-center gap-2">
+                                                        <MapPin size={16} /> Neighborhood
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        value={editData.neighborhood}
+                                                        onChange={(e) => setEditData({ ...editData, neighborhood: e.target.value })}
+                                                        placeholder="Neighborhood"
+                                                        className="w-full bg-secondary border-none rounded-xl px-4 py-3 font-bold outline-none focus:ring-2 ring-primary transition-all"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <button
+                                                type="submit"
+                                                disabled={loading}
+                                                className="w-full btn-primary py-4 rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50"
+                                            >
+                                                {loading ? "Saving..." : <><Save size={20} /> Save Changes</>}
+                                            </button>
+                                        </form>
+                                    </div>
+                                )}
 
                                 {/* Quick Info */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="bg-white p-6 rounded-xl border border-border shadow-sm">
                                         <h3 className="text-lg font-heading font-bold mb-4 flex items-center gap-2">
-                                            <Package size={20} className="text-primary" /> Recent Order
+                                            <Package size={20} className="text-primary" /> Recent Activity
                                         </h3>
-                                        <div className="p-4 bg-secondary rounded-lg">
-                                            <div className="flex justify-between mb-2">
-                                                <span className="font-bold">{dummyUser.orders[0].id}</span>
-                                                <span className="text-sm text-green-600 font-bold">{dummyUser.orders[0].status}</span>
-                                            </div>
-                                            <p className="text-sm text-muted-foreground">{dummyUser.orders[0].date} • {dummyUser.orders[0].total}</p>
+                                        <div className="p-4 bg-secondary rounded-lg text-center py-10">
+                                            <p className="text-muted-foreground font-bold">No recent orders yet.</p>
                                         </div>
                                     </div>
                                     <div className="bg-white p-6 rounded-xl border border-border shadow-sm">
                                         <h3 className="text-lg font-heading font-bold mb-4 flex items-center gap-2">
-                                            <MapPin size={20} className="text-primary" /> Default Address
+                                            <MapPin size={20} className="text-primary" /> Current Address
                                         </h3>
-                                        <p className="text-muted-foreground leading-relaxed">
-                                            {dummyUser.addresses[0].street}<br />
-                                            {dummyUser.addresses[0].city}, {dummyUser.addresses[0].state} {dummyUser.addresses[0].zip}
-                                        </p>
+                                        <div className="p-4 bg-secondary rounded-lg">
+                                            {user.address ? (
+                                                <p className="text-foreground font-bold leading-relaxed">
+                                                    {user.address.city}, {user.address.subcity}<br />
+                                                    {user.address.neighborhood}
+                                                </p>
+                                            ) : (
+                                                <p className="text-muted-foreground font-bold italic">No address added yet.</p>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         )}
 
                         {activeTab === "orders" && (
-                            <div className="bg-white rounded-xl border border-border shadow-sm overflow-hidden">
-                                <div className="p-6 border-b border-border">
-                                    <h2 className="text-xl font-heading font-extrabold">Order History</h2>
-                                </div>
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-left">
-                                        <thead>
-                                            <tr className="bg-secondary text-sm font-bold text-muted-foreground uppercase tracking-wider">
-                                                <th className="px-6 py-4">Order ID</th>
-                                                <th className="px-6 py-4">Date</th>
-                                                <th className="px-6 py-4">Status</th>
-                                                <th className="px-6 py-4">Items</th>
-                                                <th className="px-6 py-4">Total</th>
-                                                <th className="px-6 py-4"></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-border">
-                                            {dummyUser.orders.map((order) => (
-                                                <tr key={order.id} className="hover:bg-secondary/50 transition-colors">
-                                                    <td className="px-6 py-4 font-bold">{order.id}</td>
-                                                    <td className="px-6 py-4 text-muted-foreground">{order.date}</td>
-                                                    <td className="px-6 py-4">
-                                                        <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold uppercase">
-                                                            {order.status}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-4 text-muted-foreground">{order.items} items</td>
-                                                    <td className="px-6 py-4 font-bold">{order.total}</td>
-                                                    <td className="px-6 py-4">
-                                                        <button className="text-primary hover:underline font-bold flex items-center gap-1">
-                                                            View <ChevronRight size={16} />
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
+                            <div className="bg-white rounded-xl border border-border shadow-sm p-10 text-center">
+                                <Package size={48} className="mx-auto text-muted-foreground mb-4" />
+                                <h2 className="text-xl font-heading font-extrabold mb-2">No Orders Found</h2>
+                                <p className="text-muted-foreground font-bold mb-6">You haven't placed any orders yet.</p>
+                                <button onClick={() => router.push("/shop")} className="btn-primary py-3 px-8">Start Shopping</button>
                             </div>
                         )}
 
@@ -154,22 +257,24 @@ export default function ProfilePage() {
                             <div className="space-y-6">
                                 <div className="flex justify-between items-center">
                                     <h2 className="text-xl font-heading font-extrabold text-foreground">Managed Addresses</h2>
-                                    <button className="btn-primary py-2 text-sm">+ Add New Address</button>
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {dummyUser.addresses.map((address) => (
-                                        <div key={address.id} className="bg-white p-6 rounded-xl border-2 border-primary shadow-sm relative">
+                                <div className="bg-white p-8 rounded-xl border border-border shadow-sm">
+                                    {user.address ? (
+                                        <div className="border-2 border-primary p-6 rounded-xl relative">
                                             <div className="absolute top-4 right-4 text-xs font-bold bg-primary text-white px-2 py-1 rounded">DEFAULT</div>
-                                            <h3 className="font-bold mb-2">{address.type}</h3>
-                                            <p className="text-muted-foreground mb-4">
-                                                {address.street}, {address.city}, {address.state} {address.zip}
+                                            <h3 className="font-bold mb-2">Shipping Address</h3>
+                                            <p className="text-muted-foreground font-bold mb-4">
+                                                {user.address.city}, {user.address.subcity}<br />
+                                                {user.address.neighborhood}
                                             </p>
-                                            <div className="flex gap-4">
-                                                <button className="text-sm font-bold border-b border-foreground">Edit</button>
-                                                <button className="text-sm font-bold text-red-500">Remove</button>
-                                            </div>
+                                            <button onClick={() => { setActiveTab("overview"); setIsEditing(true); }} className="text-sm font-bold border-b border-foreground">Edit</button>
                                         </div>
-                                    ))}
+                                    ) : (
+                                        <div className="text-center py-10">
+                                            <p className="text-muted-foreground font-bold mb-4">No addresses saved.</p>
+                                            <button onClick={() => { setActiveTab("overview"); setIsEditing(true); }} className="btn-primary py-2 px-6">Add Address</button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}

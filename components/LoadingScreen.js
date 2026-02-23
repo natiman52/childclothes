@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
-
+import ShinyText from "./ShinyText";
 export default function LoadingScreen() {
     const containerRef = useRef(null);
     const textRef = useRef(null);
@@ -44,7 +44,7 @@ export default function LoadingScreen() {
             className="fixed inset-0 z-[999] bg-foreground flex items-center justify-center pointer-events-none"
         >
             <div ref={textRef} className="text-white text-4xl md:text-6xl font-heading font-black tracking-tighter">
-                ሰላም ልብስ
+                <ShinyText text="ሰላም ልብስ" />
             </div>
         </div>
     );
