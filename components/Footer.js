@@ -17,12 +17,12 @@ export default function Footer() {
                         <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-4">Customer support</h3>
                         <p className="text-xl font-heading font-bold">+251 91 123 4567</p>
                     </div>
-                    <div className="flex flex-col items-center md:items-end text-center md:text-right">
+                    {/* <div className="flex flex-col items-center md:items-end text-center md:text-right">
                         <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-4">Looking for our products?</h3>
                         <Link href="/retailers" className="text-xl font-heading font-bold flex items-center gap-2 hover:text-primary transition-colors">
                             Find a retailer <ArrowRight size={20} className="text-primary" />
                         </Link>
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* Main Footer Content */}

@@ -8,7 +8,7 @@ import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-
+import { ALL_PRODUCTS } from "@/lib/utils";
 gsap.registerPlugin(ScrollTrigger);
 
 const FEATURED_CATEGORIES = [
@@ -18,12 +18,6 @@ const FEATURED_CATEGORIES = [
   { name: "Girls", slug: "girls", color: "bg-[#fef9e7]", image: "/images/kid 1.jpg" },
 ];
 
-const MOCK_PRODUCTS = [
-  { id: "1", name: "Waffle Textured Plush Set", price: 350, category: "Baby Boy", image: "/images/todler 2.jpg" },
-  { id: "2", name: "Ribbed Jogging Set", price: 400, category: "Baby Girl", image: "/images/todler 1.jpg" },
-  { id: "3", name: "Purl Knit Dungarees", price: 450, category: "Boys", image: "/images/kid 2.jpg" },
-  { id: "4", name: "Cotton Jersey Top", price: 250, category: "Girls", image: "/images/kid 1.jpg" },
-];
 
 export default function Home() {
   const categoriesRef = useRef(null);
@@ -123,7 +117,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {MOCK_PRODUCTS.map((product) => (
+            {ALL_PRODUCTS.slice(0, 4).map((product) => (
               <ProductCard key={product.id} {...product} />
             ))}
           </div>
@@ -147,7 +141,7 @@ export default function Home() {
             <div className="space-y-4">
               <div className="text-5xl mb-6">💌</div>
               <h3 className="text-2xl font-heading font-bold">Happy to help you</h3>
-              <p className="text-muted-foreground leading-relaxed">Any question? We are happy to help you by E-Mail</p>
+              <p className="text-muted-foreground leading-relaxed">Any question? We are happy to help you by telegram</p>
             </div>
           </div>
         </div>

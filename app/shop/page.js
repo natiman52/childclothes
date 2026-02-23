@@ -2,23 +2,13 @@
 import { useState } from "react";
 import ProductCard from "@/components/ProductCard";
 import { Filter, X, ChevronDown } from "lucide-react";
-
-const ALL_PRODUCTS = [
-    { id: "1", name: "Waffle Textured Plush Set", price: 14.99, category: "Baby Boy", image: "/images/todler 2.jpg" },
-    { id: "2", name: "Ribbed Jogging Set", price: 18.50, category: "Baby Girl", image: "/images/todler 1.jpg" },
-    { id: "3", name: "Purl Knit Dungarees", price: 15.99, category: "Boys", image: "/images/kid 2.jpg" },
-    { id: "4", name: "Cotton Jersey Top", price: 9.99, category: "Girls", image: "/images/kid 1.jpg" },
-    { id: "5", name: "Cozy Wool Sweater", price: 24.50, category: "Boys", image: "/images/kid 2.jpg" },
-    { id: "6", name: "Fluffy Pink Dress", price: 29.99, category: "Girls", image: "/images/kid 1.jpg" },
-    { id: "7", name: "Denim Overall", price: 19.99, category: "Baby Boy", image: "/images/todler 2.jpg" },
-    { id: "8", name: "Floral Romper", price: 12.50, category: "Baby Girl", image: "/images/todler 1.jpg" },
-];
+import { ALL_PRODUCTS } from "@/lib/utils";
 
 const CATEGORIES = ["All Products", "Baby Boy", "Baby Girl", "Boys", "Girls"];
 
 export default function ShopPage() {
     const [selectedCategory, setSelectedCategory] = useState("All Products");
-    const [priceRange, setPriceRange] = useState(100);
+    const [priceRange, setPriceRange] = useState(500);
     const [sortBy, setSortBy] = useState("Latest");
     const [isFilterOpen, setIsFilterOpen] = useState(false);
 
@@ -41,14 +31,14 @@ export default function ShopPage() {
                 </p>
             </div>
 
-            {/* Mobile Filter Button */}
-            <div className="lg:hidden sticky top-20 z-40 bg-white/80 backdrop-blur-md border-b border-secondary py-4 px-4 flex justify-between items-center">
+            {/* Filter Toggle Button */}
+            <div className="container sticky top-20 z-40 bg-white/80 backdrop-blur-md border-b border-secondary py-4 px-4 flex justify-between items-center mb-4 mx-auto">
                 <button
-                    onClick={() => setIsFilterOpen(true)}
+                    onClick={() => setIsFilterOpen(!isFilterOpen)}
                     className="flex items-center gap-2 font-bold px-6 py-3 bg-secondary rounded-2xl hover:bg-secondary/80 transition-all text-sm"
                 >
                     <Filter size={18} className="text-primary" />
-                    {isFilterOpen ? "Close Filters" : "Show Filters"}
+                    {isFilterOpen ? "Hide Filters" : "Show Filters"}
                 </button>
                 <div className="text-xs font-bold text-muted-foreground">
                     {filteredProducts.length} items
@@ -57,7 +47,7 @@ export default function ShopPage() {
 
             {/* Product Grid Container */}
             <div className="container mx-auto px-4 py-12 md:py-20">
-                <div className="flex flex-col lg:flex-row gap-12">
+                <div className={`flex flex-col lg:flex-row transition-all duration-300 ${isFilterOpen ? 'lg:gap-12' : 'lg:gap-0'}`}>
 
                     {/* Filters Sidebar Overlay (Mobile) */}
                     {isFilterOpen && (
@@ -69,8 +59,12 @@ export default function ShopPage() {
 
                     {/* Filters Sidebar */}
                     <aside className={`
-                        fixed inset-y-0 left-0 w-[80%] max-w-xs bg-white z-[101] p-8 shadow-2xl transition-transform duration-300 lg:static lg:w-64 lg:p-0 lg:shadow-none lg:z-auto lg:translate-x-0
-                        ${isFilterOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                        fixed inset-y-0 left-0 w-[80%] max-w-xs bg-white z-[101] p-8 shadow-2xl transition-all duration-300 
+                        lg:relative lg:inset-auto lg:z-auto lg:shadow-none lg:p-0 overflow-hidden
+                        ${isFilterOpen
+                            ? 'translate-x-0 lg:w-64 lg:opacity-100'
+                            : '-translate-x-full lg:w-0 lg:opacity-0 lg:pointer-events-none'
+                        }
                     `}>
                         <div className="flex justify-between items-center mb-10 lg:hidden">
                             <h2 className="text-2xl font-heading font-black">Filters</h2>
@@ -105,14 +99,15 @@ export default function ShopPage() {
                                 <input
                                     type="range"
                                     min="0"
-                                    max="100"
+                                    max="500"
+                                    step="10"
                                     value={priceRange}
                                     onChange={(e) => setPriceRange(parseInt(e.target.value))}
                                     className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
                                 />
                                 <div className="flex justify-between text-xs font-bold text-muted-foreground mt-4">
                                     <span>ETB 0</span>
-                                    <span>ETB 100</span>
+                                    <span>ETB 500</span>
                                 </div>
                             </div>
 

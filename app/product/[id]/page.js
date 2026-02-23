@@ -6,18 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ChevronLeft, Plus, Minus, Star, Heart, Share2, ShoppingBag } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import Link from "next/link";
-
-const ALL_PRODUCTS = [
-    { id: "1", name: "Waffle Textured Plush Set", price: 14.99, category: "Baby Boy", image: "/images/todler 2.jpg", description: "This waffle textured plush set is designed for maximum comfort and style. Made from premium soft cotton, it's perfect for casual wear and keeping your little one cozy throughout the day." },
-    { id: "2", name: "Ribbed Jogging Set", price: 18.50, category: "Baby Girl", image: "/images/todler 1.jpg", description: "Our ribbed jogging set offers a modern look with a focus on ease of movement. The soft, stretchy fabric ensures your child stays comfortable whether playing at home or out on an adventure." },
-    { id: "3", name: "Purl Knit Dungarees", price: 15.99, category: "Boys", image: "/images/kid 2.jpg", description: "Classic purl knit dungarees that combine durability with a timeless aesthetic. Features adjustable straps and reinforced stitching for active boys who love to explore." },
-    { id: "4", name: "Cotton Jersey Top", price: 9.99, category: "Girls", image: "/images/kid 1.jpg", description: "A simple yet elegant cotton jersey top that's a staple for any wardrobe. Soft against the skin and easy to style with various bottoms for any occasion." },
-    { id: "5", name: "Cozy Wool Sweater", price: 24.50, category: "Boys", image: "/images/kid 2.jpg", description: "Keep them warm with our cozy wool sweater. Crafted from a blend of fine wool, it provides excellent insulation without being bulky." },
-    { id: "6", name: "Fluffy Pink Dress", price: 29.99, category: "Girls", image: "/images/kid 1.jpg", description: "A dreamy fluffy pink dress that's perfect for parties and special events. Multi-layered tulle and a soft lining make it as comfortable as it is beautiful." },
-    { id: "7", name: "Denim Overall", price: 19.99, category: "Baby Boy", image: "/images/todler 2.jpg", description: "Rugged yet soft denim overalls designed for the smallest explorers. Practical pockets and easy-snap closures for quick changes." },
-    { id: "8", name: "Floral Romper", price: 12.50, category: "Baby Girl", image: "/images/todler 1.jpg", description: "Adorable floral romper with a vintage vibe. Delicate prints and ruffled details make this a standout piece for sunny days." },
-];
-
+import { ALL_PRODUCTS } from "@/lib/utils";
 export default function ProductDetailPage() {
     const { id } = useParams();
     const router = useRouter();
