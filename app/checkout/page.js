@@ -7,21 +7,21 @@ import Image from "next/image";
 import { ChevronLeft, ShoppingBag, Truck, MapPin, Phone, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
+import { useUserStore } from "@/store/useUserStore";
+
 export default function CheckoutPage() {
     const { cart, cartTotal, clearCart } = useCart();
     const router = useRouter();
-    const [user, setUser] = useState(null);
+    const user = useUserStore((state) => state.user);
     const [loading, setLoading] = useState(false);
     const [orderDone, setOrderDone] = useState(false);
 
     useEffect(() => {
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        } else {
+        if (!user) {
             router.push("/login?redirect=/checkout");
         }
-    }, [router]);
+    }, [user, router]);
+
 
     const handlePlaceOrder = async () => {
         if (!user || cart.length === 0) return;

@@ -1,92 +1,106 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { ChevronLeft, Plus, Minus, Star, Heart, Share2, ShoppingBag, Send } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import Link from "next/link";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useUserStore } from "@/store/useUserStore";
+import LoadingSpinner from "@/components/LoadingSpinner";
+
 
 export default function ProductDetailPage() {
     const { id } = useParams();
     const router = useRouter();
     const { addToCart } = useCart();
+    const queryClient = useQueryClient();
+    const user = useUserStore((state) => state.user);
 
-    const [product, setProduct] = useState(null);
-    const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState(1);
     const [activeTab, setActiveTab] = useState("description");
     const [selectedVariation, setSelectedVariation] = useState(null);
     const [selectedImage, setSelectedImage] = useState(0);
-    const [user, setUser] = useState(null);
 
     // Review/Question form states
     const [newRating, setNewRating] = useState({ stars: 5, comment: "" });
     const [newQuestion, setNewQuestion] = useState("");
 
-    useEffect(() => {
-        const fetchProduct = async () => {
-            try {
-                const res = await fetch(`/api/products/${id}`);
-                const data = await res.json();
-                setProduct(data);
-                if (data.variations?.length > 0) {
-                    setSelectedVariation(data.variations[0]);
-                }
-            } catch (error) {
-                console.error("Error fetching product:", error);
-            } finally {
-                setLoading(false);
+    // Fetch Product Data
+    const { data: product, isLoading: isProductLoading } = useQuery({
+        queryKey: ["product", id],
+        queryFn: async () => {
+            const res = await fetch(`/api/products/${id}`);
+            if (!res.ok) throw new Error("Failed to fetch product");
+            const data = await res.json();
+            return data;
+        },
+        onSuccess: (data) => {
+            if (data.variations?.length > 0 && !selectedVariation) {
+                setSelectedVariation(data.variations[0]);
             }
-        };
+        }
+    });
 
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) setUser(JSON.parse(storedUser));
+    // Mutations
+    const ratingMutation = useMutation({
+        mutationFn: async (ratingData) => {
+            const res = await fetch(`/api/products/${id}/ratings`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(ratingData)
+            });
+            if (!res.ok) throw new Error("Failed to add rating");
+            return res.json();
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["product", id] });
+            setNewRating({ stars: 5, comment: "" });
+        }
+    });
 
-        fetchProduct();
-    }, [id]);
+    const questionMutation = useMutation({
+        mutationFn: async (questionText) => {
+            const res = await fetch(`/api/products/${id}/questions`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: questionText, userId: user.id })
+            });
+            if (!res.ok) throw new Error("Failed to add question");
+            return res.json();
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["product", id] });
+            setNewQuestion("");
+        }
+    });
 
-    const handleAddRating = async () => {
+    // Variation auto-selection effect
+    useEffect(() => {
+        if (product?.variations?.length > 0 && !selectedVariation) {
+            setSelectedVariation(product.variations[0]);
+        }
+    }, [product, selectedVariation]);
+
+    const handleAddRating = () => {
         if (!user) {
             router.push(`/login?message=Please login to rate products`);
             return;
         }
-        try {
-            const res = await fetch(`/api/products/${id}/ratings`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ...newRating, userId: user.id })
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setProduct(prev => ({ ...prev, ratings: [data, ...prev.ratings] }));
-                setNewRating({ stars: 5, comment: "" });
-            }
-        } catch (err) {
-            console.error(err);
-        }
+        ratingMutation.mutate({ ...newRating, userId: user.id });
     };
 
-    const handleAddQuestion = async () => {
+    const handleAddQuestion = () => {
         if (!user) {
             router.push(`/login?message=Please login to ask questions`);
             return;
         }
-        try {
-            const res = await fetch(`/api/products/${id}/questions`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ text: newQuestion, userId: user.id })
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setProduct(prev => ({ ...prev, questions: [data, ...prev.questions] }));
-                setNewQuestion("");
-            }
-        } catch (err) {
-            console.error(err);
-        }
+        questionMutation.mutate(newQuestion);
     };
 
-    if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    if (isProductLoading) return <LoadingSpinner />;
+
 
     if (!product) {
         return (

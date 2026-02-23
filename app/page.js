@@ -7,6 +7,8 @@ import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useQuery } from "@tanstack/react-query";
+import { useUserStore } from "@/store/useUserStore";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -19,23 +21,24 @@ const FEATURED_CATEGORIES = [
 
 
 export default function Home() {
-  const [products, setProducts] = useState([]);
   const categoriesRef = useRef(null);
   const productsRef = useRef(null);
   const benefitsRef = useRef(null);
+  const { hydrate } = useUserStore();
 
   useEffect(() => {
-    const fetchFeatured = async () => {
-      try {
-        const res = await fetch("/api/products");
-        const data = await res.json();
-        setProducts(data?.slice(0, 4));
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchFeatured();
-  }, []);
+    hydrate();
+  }, [hydrate]);
+  const { data: products = [], isLoading } = useQuery({
+    queryKey: ["featured-products"],
+    queryFn: async () => {
+      const res = await fetch("/api/products");
+      if (!res.ok) throw new Error("Failed to fetch featured products");
+      const data = await res.json();
+      return data?.slice(0, 4) || [];
+    }
+  });
+
 
 
   useEffect(() => {

@@ -20,20 +20,26 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { CartProvider } from "@/context/CartContext";
 import LoadingScreen from "@/components/LoadingScreen";
+import Providers from "@/components/Providers";
 
 export default function RootLayout({ children }) {
+
+
   return (
     <html lang="en" className={`${inter.variable} ${outfit.variable}`}>
       <body className="antialiased min-h-screen flex flex-col font-sans overflow-x-hidden">
-        <CartProvider>
-          <LoadingScreen />
-          <Navbar />
-          <main className="flex-1">
-            {children}
-          </main>
-          <Footer />
-        </CartProvider>
+        <Providers>
+          <CartProvider>
+            <LoadingScreen />
+            <Navbar />
+            <main className="flex-1">
+              {children}
+            </main>
+            <Footer />
+          </CartProvider>
+        </Providers>
       </body>
     </html>
   );
 }
+

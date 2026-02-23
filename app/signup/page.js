@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { User, Phone, Lock, MapPin, Camera } from "lucide-react";
 
+import { useUserStore } from "@/store/useUserStore";
+
 export default function SignupPage() {
+    const setUser = useUserStore((state) => state.setUser);
     const [formData, setFormData] = useState({
         username: "",
         phone: "",
@@ -24,7 +27,6 @@ export default function SignupPage() {
         e.preventDefault();
         setError("");
         setLoading(true);
-        console.log(formData);
         try {
             const res = await fetch("/api/auth/signup", {
                 method: "POST",
@@ -35,17 +37,18 @@ export default function SignupPage() {
             const data = await res.json();
 
             if (res.ok) {
-                router.push("/login?message=Signup successful! Please login.");
+                setUser(data.user);
+                router.push("/");
             } else {
                 setError(data.error || "Signup failed");
             }
         } catch (err) {
-            console.log(err);
             setError("Something went wrong. Please try again.");
         } finally {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="min-h-screen bg-secondary flex items-center justify-center p-4 py-20">

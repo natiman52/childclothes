@@ -6,7 +6,10 @@ import Link from "next/link";
 import { Phone, Lock, User } from "lucide-react";
 
 
+import { useUserStore } from "@/store/useUserStore";
+
 export default function LoginPage() {
+    const setUser = useUserStore((state) => state.setUser);
     const [formData, setFormData] = useState({
         identifier: "",
         password: ""
@@ -43,8 +46,7 @@ export default function LoginPage() {
             const data = await res.json();
 
             if (res.ok) {
-                // Store user info in localStorage for simple session management
-                localStorage.setItem("user", JSON.stringify(data.user));
+                setUser(data.user);
                 router.push("/");
                 router.refresh();
             } else {
@@ -56,6 +58,7 @@ export default function LoginPage() {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="min-h-screen bg-secondary flex items-center justify-center p-4">

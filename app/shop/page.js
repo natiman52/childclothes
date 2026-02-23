@@ -1,37 +1,32 @@
-"use client"
-import { useState, useEffect } from "react";
-import ProductCard from "@/components/ProductCard";
-import { Filter, X, ChevronDown } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function ShopPage() {
-    const [products, setProducts] = useState([]);
-    const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState("All Products");
-    const [priceRange, setPriceRange] = useState(10000); // Higher default for ETB
+    const [priceRange, setPriceRange] = useState(10000);
     const [sortBy, setSortBy] = useState("Latest");
     const [isFilterOpen, setIsFilterOpen] = useState(false);
-    const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const [prodRes, catRes] = await Promise.all([
-                    fetch("/api/products"),
-                    fetch("/api/categories")
-                ]);
-                const prodData = await prodRes.json();
-                const catData = await catRes.json();
-                setProducts(prodData);
-                setCategories([{ id: "all", name: "All Products" }, ...catData]);
-            } catch (error) {
-                console.error("Error fetching shop data:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
-    }, []);
+    // Fetch Products
+    const { data: products = [], isLoading: isProductsLoading } = useQuery({
+        queryKey: ["products"],
+        queryFn: async () => {
+            const res = await fetch("/api/products");
+            if (!res.ok) throw new Error("Failed to fetch products");
+            return res.json();
+        }
+    });
+
+    // Fetch Categories
+    const { data: categories = [], isLoading: isCategoriesLoading } = useQuery({
+        queryKey: ["categories"],
+        queryFn: async () => {
+            const res = await fetch("/api/categories");
+            if (!res.ok) throw new Error("Failed to fetch categories");
+            const data = await res.json();
+            return [{ id: "all", name: "All Products" }, ...data];
+        }
+    });
 
     const filteredProducts = products
         .filter(p => {
@@ -44,6 +39,11 @@ export default function ShopPage() {
             if (sortBy === "Price: High to Low") return b.basePrice - a.basePrice;
             return new Date(b.createdAt) - new Date(a.createdAt);
         });
+
+    if (isProductsLoading || isCategoriesLoading) {
+        return <LoadingSpinner />;
+    }
+
 
 
     return (

@@ -6,19 +6,15 @@ import { Search, Heart, User, ShoppingBag, Menu, X } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import CartDrawer from "./CartDrawer";
 
+import { useUserStore } from "@/store/useUserStore";
+
 export default function Navbar() {
     const { cartCount, setIsCartOpen } = useCart();
     const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const [user, setUser] = useState(null);
-
-    useEffect(() => {
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        }
-    }, []);
+    const user = useUserStore((state) => state.user);
 
 
+    console.log(user);
     return (
         <nav className="sticky top-0 z-50 bg-white border-b border-secondary">
             <div className="container mx-auto px-4 h-20 flex items-center justify-between gap-4">

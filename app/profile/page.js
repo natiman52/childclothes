@@ -1,18 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { User, Package, MapPin, Settings, LogOut, ChevronRight, Camera, Save, X } from "lucide-react";
+import { User, Package, MapPin, Settings, LogOut, Camera, Save, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useUserStore } from "@/store/useUserStore";
 
 export default function ProfilePage() {
-    const [user, setUser] = useState(null);
     const [activeTab, setActiveTab] = useState("overview");
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const router = useRouter();
-
+    const { user, logout } = useUserStore();
     const [editData, setEditData] = useState({
         photo: "",
         city: "",
@@ -21,15 +21,12 @@ export default function ProfilePage() {
     });
 
     useEffect(() => {
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-            const parsedUser = JSON.parse(storedUser);
-            setUser(parsedUser);
+        if (user != null) {
             setEditData({
-                photo: parsedUser.photo || "",
-                city: parsedUser.address?.city || "Addis Ababa",
-                subcity: parsedUser.address?.subcity || "Bole",
-                neighborhood: parsedUser.address?.neighborhood || ""
+                photo: user.photo || "",
+                city: user.address?.city || "Addis Ababa",
+                subcity: user.address?.subcity || "Bole",
+                neighborhood: user.address?.neighborhood || ""
             });
         } else {
             router.push("/login");
@@ -37,7 +34,7 @@ export default function ProfilePage() {
     }, [router]);
 
     const handleLogout = () => {
-        localStorage.removeItem("user");
+        logout();
         router.push("/login");
     };
 
