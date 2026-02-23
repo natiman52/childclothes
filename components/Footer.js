@@ -87,7 +87,7 @@ export default function Footer() {
                 </div>
 
                 <div className="pt-8 border-t border-secondary flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-                    <p>© {new Date().getFullYear()} ሰላም ልብስ. All rights reserved.</p>
+                    <p>© Made by <span className="text-primary">Abysinia Tech</span>. All rights reserved.</p>
                     <div className="flex gap-6">
                         <Link href="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
                         <Link href="/terms" className="hover:text-primary transition-colors">Terms</Link>
