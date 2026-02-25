@@ -6,8 +6,8 @@ import { useCart } from "@/context/CartContext";
 import Image from "next/image";
 import { ChevronLeft, ShoppingBag, Truck, MapPin, Phone, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
-
 import { useUserStore } from "@/store/useUserStore";
+import axios from "axios";
 
 export default function CheckoutPage() {
     const { cart, cartTotal, clearCart } = useCart();
@@ -35,21 +35,13 @@ export default function CheckoutPage() {
                 price: item.price
             }));
 
-            const res = await fetch("/api/orders", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    userId: user.id,
-                    items: orderItems
-                })
+            const { data } = await axios.post("/api/orders", {
+                userId: user.id,
+                items: orderItems
             });
 
-            if (res.ok) {
-                setOrderDone(true);
-                clearCart();
-            } else {
-                alert("Failed to place order. Please try again.");
-            }
+            setOrderDone(true);
+            clearCart();
         } catch (error) {
             console.error("Place order error:", error);
             alert("An error occurred. Please try again.");

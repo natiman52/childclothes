@@ -1,19 +1,22 @@
+"use client"
 import { useQuery } from "@tanstack/react-query";
 import LoadingSpinner from "@/components/LoadingSpinner";
-
+import { useState } from "react";
+import { Filter, X, ChevronDown } from "lucide-react";
+import ProductCard from "@/components/ProductCard";
 export default function ShopPage() {
     const [selectedCategory, setSelectedCategory] = useState("All Products");
     const [priceRange, setPriceRange] = useState(10000);
     const [sortBy, setSortBy] = useState("Latest");
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [axios] = useState(() => require("axios").default);
 
     // Fetch Products
     const { data: products = [], isLoading: isProductsLoading } = useQuery({
         queryKey: ["products"],
         queryFn: async () => {
-            const res = await fetch("/api/products");
-            if (!res.ok) throw new Error("Failed to fetch products");
-            return res.json();
+            const { data } = await axios.get("/api/products");
+            return data;
         }
     });
 
@@ -21,9 +24,7 @@ export default function ShopPage() {
     const { data: categories = [], isLoading: isCategoriesLoading } = useQuery({
         queryKey: ["categories"],
         queryFn: async () => {
-            const res = await fetch("/api/categories");
-            if (!res.ok) throw new Error("Failed to fetch categories");
-            const data = await res.json();
+            const { data } = await axios.get("/api/categories");
             return [{ id: "all", name: "All Products" }, ...data];
         }
     });

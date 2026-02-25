@@ -1,11 +1,20 @@
 ## things to do
 
-* change the profile image to be an uploadable image
-* 
-
+* fix the requirment of url links for images and handle it using uploadthings (done)
+* Preventing product creation without variations (done)
+* only allow admin to go to admin pages and also showing an admin icon if the current user is admin (done)
+* first auto refresh every 1 minute for order page
+* divide active and non active orders (deleivered and non-delivered by creating separate pages  for them)
+* replace the hero page with dynamic data
+* add cart to localstorage
+* clean up footer 
+* clean up faq page
+* clean up terms page
+* clean up privacy page
+* clean up shipping page
 ## things done
-- I've completed the integration of Zustand and TanStack Query.
-
-Zustand: Now manages the user authentication state globally across the app.
-TanStack Query: Now handles data fetching for products and categories, providing automatic caching and smoother UI transitions.
-Refactored Pages: Home, Shop, Product Detail, Login, and Signup pages have all been updated to use these new tools for better performance and reactivity. You can see the full details in the walkthrough.
+- Backend APIs and Frontend Wiring (Admin Dashboard)
+- Orders logic (GET all, GET one, PUT update) and frontend wiring
+- Users logic (GET all, GET one, PUT update) and frontend wiring
+- Products logic (mutations for existing GET) and frontend wiring
+- Categories logic (mutations for existing GET) and frontend wiring

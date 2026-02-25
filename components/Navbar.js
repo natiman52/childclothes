@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 
 import Link from "next/link";
-import { Search, Heart, User, ShoppingBag, Menu, X } from "lucide-react";
+import { Search, Heart, User, ShoppingBag, Menu, X, ShieldCheck } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import CartDrawer from "./CartDrawer";
 
@@ -43,6 +43,12 @@ export default function Navbar() {
 
                 {/* Action Icons */}
                 <div className="flex items-center gap-2 sm:gap-4">
+                    {user?.role === "ADMIN" && (
+                        <Link href="/admin" className="p-2 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-full border border-primary/20 transition-all flex items-center gap-2 pr-4 pl-3 group">
+                            <ShieldCheck size={20} className="group-hover:scale-110 transition-transform" />
+                            <span className="text-xs font-black uppercase tracking-tight hidden md:block">Admin</span>
+                        </Link>
+                    )}
                     <button className="p-2 hover:bg-secondary rounded-full border border-secondary transition-colors hidden md:block">
                         <Heart size={20} />
                     </button>

@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useUserStore } from "@/store/useUserStore";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import axios from "axios";
 
 
 export default function ProductDetailPage() {
@@ -31,9 +32,7 @@ export default function ProductDetailPage() {
     const { data: product, isLoading: isProductLoading } = useQuery({
         queryKey: ["product", id],
         queryFn: async () => {
-            const res = await fetch(`/api/products/${id}`);
-            if (!res.ok) throw new Error("Failed to fetch product");
-            const data = await res.json();
+            const { data } = await axios.get(`/api/products/${id}`);
             return data;
         },
         onSuccess: (data) => {
@@ -46,13 +45,8 @@ export default function ProductDetailPage() {
     // Mutations
     const ratingMutation = useMutation({
         mutationFn: async (ratingData) => {
-            const res = await fetch(`/api/products/${id}/ratings`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(ratingData)
-            });
-            if (!res.ok) throw new Error("Failed to add rating");
-            return res.json();
+            const { data } = await axios.post(`/api/products/${id}/ratings`, ratingData);
+            return data;
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["product", id] });
@@ -62,13 +56,8 @@ export default function ProductDetailPage() {
 
     const questionMutation = useMutation({
         mutationFn: async (questionText) => {
-            const res = await fetch(`/api/products/${id}/questions`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ text: questionText, userId: user.id })
-            });
-            if (!res.ok) throw new Error("Failed to add question");
-            return res.json();
+            const { data } = await axios.post(`/api/products/${id}/questions`, { text: questionText, userId: user.id });
+            return data;
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["product", id] });
@@ -272,12 +261,6 @@ export default function ProductDetailPage() {
                                     <p className="text-muted-foreground leading-relaxed text-lg mb-6">
                                         {product.description}
                                     </p>
-                                    <ul className="space-y-3 text-muted-foreground text-lg list-disc pl-5">
-                                        <li>Premium organic cotton blend</li>
-                                        <li>Breathable waffle-texture fabric</li>
-                                        <li>Reinforced seams for active play</li>
-                                        <li>Machine washable and pre-shrunk</li>
-                                    </ul>
                                 </div>
                             </div>
                         )}

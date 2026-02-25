@@ -8,6 +8,23 @@ export function CartProvider({ children }) {
     const [cart, setCart] = useState([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
 
+    // Load cart from localstorage on mount
+    useEffect(() => {
+        const savedCart = localStorage.getItem("cart");
+        if (savedCart) {
+            try {
+                setCart(JSON.parse(savedCart));
+            } catch (error) {
+                console.error("Failed to parse cart from localstorage", error);
+            }
+        }
+    }, []);
+
+    // Save cart to localstorage on change
+    useEffect(() => {
+        localStorage.setItem("cart", JSON.stringify(cart));
+    }, [cart]);
+
     const addToCart = (product) => {
         setCart((prev) => {
             const variantId = product.variation?.id;

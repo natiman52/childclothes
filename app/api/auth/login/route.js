@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { normalizePhone } from "@/lib/utils";
+import { signToken } from "@/lib/auth";
 
 export async function POST(req) {
     try {
@@ -28,11 +29,16 @@ export async function POST(req) {
             return NextResponse.json({ error: "Invalid phone number or password" }, { status: 401 });
         }
 
-        // In a real app we would set a session/cookie here (e.g. JWT)
-        // For now, just return user info
+        // Generate token
+        const token = await signToken({
+            userId: user.id,
+            username: user.username,
+            role: user.role
+        });
 
         return NextResponse.json({
             message: "Login successful",
+            token,
             user: {
                 id: user.id,
                 username: user.username,

@@ -1,4 +1,5 @@
 import { Inter, Outfit } from "next/font/google";
+import Hydrater from "@/lib/hydrater";
 import "./globals.css";
 
 const inter = Inter({
@@ -27,6 +28,7 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="en" className={`${inter.variable} ${outfit.variable}`}>
+      <Hydrater />
       <body className="antialiased min-h-screen flex flex-col font-sans overflow-x-hidden">
         <Providers>
           <CartProvider>

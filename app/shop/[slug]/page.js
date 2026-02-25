@@ -2,13 +2,27 @@
 
 import { useParams } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
-import { ALL_PRODUCTS } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import axios from "axios";
 
 export default function CategoryPage() {
     const { slug } = useParams();
+    const decodedSlug = typeof slug === 'string' ? decodeURIComponent(slug) : String(slug);
 
-    const filteredProducts = ALL_PRODUCTS.filter(p => p.categorySlug === slug);
-    const categoryName = filteredProducts.length > 0 ? filteredProducts[0].category : slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    const { data: products = [], isLoading } = useQuery({
+        queryKey: ["products"],
+        queryFn: async () => {
+            const { data } = await axios.get("/api/products");
+            return data;
+        }
+    });
+
+    const filteredProducts = products.filter(p => p.categories?.some(c => c.name.toLowerCase() === decodedSlug.toLowerCase()));
+
+    const categoryName = decodedSlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+    if (isLoading) return <LoadingSpinner />;
 
     return (
         <div className="bg-white min-h-screen">

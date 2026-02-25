@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { User, Phone, Lock, MapPin, Camera } from "lucide-react";
+import axios from "axios";
 
 import { useUserStore } from "@/store/useUserStore";
 
@@ -28,22 +29,11 @@ export default function SignupPage() {
         setError("");
         setLoading(true);
         try {
-            const res = await fetch("/api/auth/signup", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData)
-            });
-
-            const data = await res.json();
-
-            if (res.ok) {
-                setUser(data.user);
-                router.push("/");
-            } else {
-                setError(data.error || "Signup failed");
-            }
+            const { data } = await axios.post("/api/auth/signup", formData);
+            setUser(data.user);
+            router.push("/");
         } catch (err) {
-            setError("Something went wrong. Please try again.");
+            setError(err.response?.data?.error || "Something went wrong. Please try again.");
         } finally {
             setLoading(false);
         }

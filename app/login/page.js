@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Phone, Lock, User } from "lucide-react";
+import axios from "axios";
 
 
 import { useUserStore } from "@/store/useUserStore";
@@ -37,23 +38,15 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            const res = await fetch("/api/auth/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData)
-            });
-
-            const data = await res.json();
-
-            if (res.ok) {
-                setUser(data.user);
-                router.push("/");
-                router.refresh();
-            } else {
-                setError(data.error || "Login failed");
+            const { data } = await axios.post("/api/auth/login", formData);
+            if (data.token) {
+                localStorage.setItem("token", data.token);
             }
+            setUser(data.user);
+            router.push("/");
+            router.refresh();
         } catch (err) {
-            setError("Something went wrong. Please try again.");
+            setError(err.response?.data?.error || "Something went wrong. Please try again.");
         } finally {
             setLoading(false);
         }

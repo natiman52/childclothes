@@ -2,17 +2,14 @@
 
 import { create } from "zustand";
 
-export const useUserStore = create((set) => ({
+export const useUserStore = create((set, get) => ({
     user: null,
     isAuthenticated: false,
-
+    isHydrated: false,
     setUser: (user) => {
         if (user) {
             localStorage.setItem("user", JSON.stringify(user));
             set({ user, isAuthenticated: true });
-        } else {
-            localStorage.removeItem("user");
-            set({ user: null, isAuthenticated: false });
         }
     },
 
@@ -23,7 +20,7 @@ export const useUserStore = create((set) => ({
 
     hydrate: () => {
         const storedUser = localStorage.getItem("user");
-        if (storedUser) {
+        if (storedUser && !get().isHydrated) {
             try {
                 const user = JSON.parse(storedUser);
                 set({ user, isAuthenticated: true });
@@ -32,5 +29,6 @@ export const useUserStore = create((set) => ({
                 localStorage.removeItem("user");
             }
         }
+        set({ isHydrated: true });
     }
 }));
