@@ -6,7 +6,15 @@ import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import gsap from "gsap";
 
-export default function Hero() {
+export default function Hero({
+    title = "New limited edition collection is here",
+    subtitle = "Discover our latest premium collection for your little ones",
+    imageUrl = "/images/tshirt.jpg",
+    linkText = "Shop now",
+    linkUrl = "/shop",
+    badgeText = "Summer Favorites",
+    badgePrice = "ETB 1500"
+}) {
     const heroRef = useRef(null);
     const textRef = useRef(null);
     const imageRef = useRef(null);
@@ -51,21 +59,21 @@ export default function Hero() {
 
         return () => ctx.revert();
     }, []);
-
     return (
         <section ref={heroRef} className="relative bg-secondary overflow-hidden">
             <div className="container mx-auto px-4 py-16 md:py-24 flex flex-col md:flex-row items-center min-h-[700px]">
                 {/* Text Content */}
                 <div ref={textRef} className="w-full md:w-1/2 z-10 text-center md:text-left space-y-6">
                     <p className="text-primary font-bold tracking-widest uppercase text-sm">Spring / 2026</p>
-                    <h1 className="text-5xl md:text-7xl font-heading font-black leading-tight text-foreground">
-                        New limited <br />
-                        <span className="text-primary">edition collection</span> <br />
-                        is here
+                    <h1 className="text-5xl md:text-7xl font-heading font-black leading-tight text-foreground whitespace-pre-line">
+                        {title}
                     </h1>
+                    <p className="text-muted-foreground text-lg md:text-xl font-medium max-w-lg mx-auto md:mx-0">
+                        {subtitle}
+                    </p>
                     <div className="pt-8">
-                        <Link href="/shop" className="btn-primary text-lg px-8 py-4 group">
-                            Shop now <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
+                        <Link href={linkUrl} className="btn-primary text-lg px-8 py-4 group">
+                            {linkText} <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
                         </Link>
                     </div>
                 </div>
@@ -76,8 +84,8 @@ export default function Hero() {
 
                     <div ref={imageRef} className="relative w-full h-full z-10">
                         <Image
-                            src="/images/tshirt.jpg"
-                            alt="Hero Tshirt"
+                            src={imageUrl || "/images/tshirt.jpg"}
+                            alt={title}
                             fill
                             className="object-contain drop-shadow-2xl"
                             priority
@@ -89,8 +97,8 @@ export default function Hero() {
                         ref={badgeRef}
                         className="absolute top-10 right-0 md:right-10 bg-foreground text-white p-6 rounded-3xl shadow-2xl rotate-12 hidden lg:block z-20"
                     >
-                        <p className="text-sm font-bold opacity-80 mb-1 tracking-tight">Summer Favorites</p>
-                        <p className="text-3xl font-black">ETB 1500</p>
+                        <p className="text-sm font-bold opacity-80 mb-1 tracking-tight">{badgeText ? badgeText : "Summer Favorites"}</p>
+                        <p className="text-3xl font-black">{badgePrice ? badgePrice : "1500 ETB"}</p>
                     </div>
 
                     {/* Subtle decorative circles */}

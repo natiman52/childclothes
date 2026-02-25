@@ -1,6 +1,5 @@
-"use client";
-
-import { useEffect, useRef } from "react";
+"use client"
+import { useEffect, useRef, useState } from "react";
 import Hero from "@/components/Hero";
 import ProductCard from "@/components/ProductCard";
 import Link from "next/link";
@@ -8,21 +7,44 @@ import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ALL_PRODUCTS } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import api from "@/lib/api";
+
 gsap.registerPlugin(ScrollTrigger);
 
-const FEATURED_CATEGORIES = [
-  { name: "Baby Boy", slug: "baby-boy", color: "bg-[#dbebff]", image: "/images/todler 2.jpg" },
-  { name: "Baby Girl", slug: "baby-girl", color: "bg-[#ffe5f1]", image: "/images/todler 1.jpg" },
-  { name: "Boys", slug: "boys", color: "bg-[#d5f5e3]", image: "/images/kid 2.jpg" },
-  { name: "Girls", slug: "girls", color: "bg-[#fef9e7]", image: "/images/kid 1.jpg" },
-];
+const categoryColors = ["bg-[#dbebff]", "bg-[#ffe5f1]", "bg-[#d5f5e3]", "bg-[#fef9e7]"];
+const categoryImages = ["/images/todler 2.jpg", "/images/todler 1.jpg", "/images/kid 2.jpg", "/images/kid 1.jpg"];
 
 
 export default function Home() {
   const categoriesRef = useRef(null);
   const productsRef = useRef(null);
   const benefitsRef = useRef(null);
+
+
+  const { data: featuredCategories = [] } = useQuery({
+    queryKey: ["featured-categories"],
+    queryFn: async () => {
+      const { data } = await api.get("/categories");
+      return data.sort((a, b) => (b._count?.products || 0) - (a._count?.products || 0)).slice(0, 4);
+    }
+  });
+
+  const { data: products = [], isLoading } = useQuery({
+    queryKey: ["featured-products"],
+    queryFn: async () => {
+      const { data } = await api.get("/products");
+      return data?.slice(0, 4) || [];
+    }
+  });
+  const { data: heroData } = useQuery({
+    queryKey: ["hero"],
+    queryFn: async () => {
+      const { data } = await api.get("/hero");
+      return data;
+    }
+  });
+
 
   useEffect(() => {
     const sections = [
@@ -70,7 +92,15 @@ export default function Home() {
 
   return (
     <div>
-      <Hero />
+      <Hero
+        title={heroData?.title}
+        subtitle={heroData?.subtitle}
+        imageUrl={heroData?.imageUrl}
+        linkText={heroData?.linkText}
+        linkUrl={heroData?.linkUrl}
+        badgeText={heroData?.badgeText}
+        badgePrice={heroData?.badgePrice}
+      />
 
       {/* Categories Section */}
       <section ref={categoriesRef} className="py-20 bg-white">
@@ -79,15 +109,15 @@ export default function Home() {
           <h2 className="text-4xl md:text-5xl font-heading font-black mb-12">Shop by category</h2>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-            {FEATURED_CATEGORIES.map((cat) => (
+            {featuredCategories.map((cat, index) => (
               <Link
-                key={cat.slug}
-                href={`/shop/${cat.slug}`}
+                key={cat.id}
+                href={`/shop/${cat.name}`}
                 className="group block"
               >
-                <div className={`aspect-[4/5] ${cat.color} rounded-[2rem] overflow-hidden mb-4 transition-transform group-hover:scale-95 relative`}>
+                <div className={`aspect-[4/5] ${categoryColors[index % categoryColors.length]} rounded-[2rem] overflow-hidden mb-4 transition-transform group-hover:scale-95 relative`}>
                   <Image
-                    src={cat.image}
+                    src={categoryImages[index % categoryImages.length]}
                     alt={cat.name}
                     fill
                     className="object-cover mix-blend-multiply opacity-80"
@@ -117,10 +147,11 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {ALL_PRODUCTS.slice(0, 4).map((product) => (
+            {products.map((product) => (
               <ProductCard key={product.id} {...product} />
             ))}
           </div>
+
         </div>
       </section>
 

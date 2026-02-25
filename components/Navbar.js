@@ -1,14 +1,20 @@
 "use client"
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
 import Link from "next/link";
-import { Search, Heart, User, ShoppingBag, Menu, X } from "lucide-react";
+import { Search, Heart, User, ShoppingBag, Menu, X, ShieldCheck } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import CartDrawer from "./CartDrawer";
+
+import { useUserStore } from "@/store/useUserStore";
 
 export default function Navbar() {
     const { cartCount, setIsCartOpen } = useCart();
     const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const user = useUserStore((state) => state.user);
 
+
+    console.log(user);
     return (
         <nav className="sticky top-0 z-50 bg-white border-b border-secondary">
             <div className="container mx-auto px-4 h-20 flex items-center justify-between gap-4">
@@ -37,12 +43,19 @@ export default function Navbar() {
 
                 {/* Action Icons */}
                 <div className="flex items-center gap-2 sm:gap-4">
+                    {user?.role === "ADMIN" && (
+                        <Link href="/admin" className="p-2 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-full border border-primary/20 transition-all flex items-center gap-2 pr-4 pl-3 group">
+                            <ShieldCheck size={20} className="group-hover:scale-110 transition-transform" />
+                            <span className="text-xs font-black uppercase tracking-tight hidden md:block">Admin</span>
+                        </Link>
+                    )}
                     <button className="p-2 hover:bg-secondary rounded-full border border-secondary transition-colors hidden md:block">
                         <Heart size={20} />
                     </button>
-                    <Link href="/login" className="p-2 hover:bg-secondary rounded-full border border-secondary transition-colors">
+                    <Link href={user ? "/profile" : "/login"} className="p-2 hover:bg-secondary rounded-full border border-secondary transition-colors">
                         <User size={20} />
                     </Link>
+
                     <button
                         onClick={() => setIsCartOpen(true)}
                         className="p-2 hover:bg-secondary rounded-full border border-secondary transition-colors relative"

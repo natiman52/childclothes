@@ -15,7 +15,7 @@ export default function Footer() {
                     </div>
                     <div className="flex flex-col items-center text-center">
                         <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-4">Customer support</h3>
-                        <p className="text-xl font-heading font-bold">+251 91 123 4567</p>
+                        <p className="text-xl font-heading font-bold">+251 97 269 2781</p>
                     </div>
                     {/* <div className="flex flex-col items-center md:items-end text-center md:text-right">
                         <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-4">Looking for our products?</h3>
@@ -59,35 +59,22 @@ export default function Footer() {
                         <ul className="space-y-3">
                             <li><Link href="/terms" className="hover:text-primary transition-colors">Terms & Conditions</Link></li>
                             <li><Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
-                            <li><Link href="/shipping" className="hover:text-primary transition-colors">Shipping Policy</Link></li>
-                            <li><Link href="/refund" className="hover:text-primary transition-colors">Refund Policy</Link></li>
                         </ul>
                     </div>
 
                     {/* Newsletter & Contact */}
                     <div className="flex flex-col items-center md:items-start text-center md:text-left">
-                        <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-6">Newsletter</h3>
-                        <p className="text-sm text-muted-foreground mb-4">Subscribe for exclusive offers and updates.</p>
-                        <form className="flex w-full gap-2 mb-6">
-                            <input
-                                type="email"
-                                placeholder="Email"
-                                className="flex-1 px-4 py-2 bg-secondary rounded-md outline-none focus:ring-1 focus:ring-primary text-sm"
-                            />
-                            <button className="bg-primary text-white p-2 rounded-md hover:bg-[#d46d45] transition-colors">
-                                <ArrowRight size={18} />
-                            </button>
-                        </form>
+                        <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-6">Contact</h3>
+
                         <div className="text-sm">
-                            <p className="font-bold">Contact:</p>
-                            <p className="text-muted-foreground">+251 91 123 4567</p>
-                            <p className="text-muted-foreground">hello@selamlibs.com</p>
+                            <p className="text-muted-foreground">+251 97 269 2781</p>
+                            <p className="text-muted-foreground">natnealyaza23@gmail.com</p>
                         </div>
                     </div>
                 </div>
 
                 <div className="pt-8 border-t border-secondary flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-                    <p>© Made by <span className="font-bold text-primary">Abysinia Tech</span>. All rights reserved.</p>
+                    <p>© Made by <span className="text-primary">Abysinia Tech</span>. All rights reserved.</p>
                     <div className="flex gap-6">
                         <Link href="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
                         <Link href="/terms" className="hover:text-primary transition-colors">Terms</Link>

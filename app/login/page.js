@@ -1,112 +1,122 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Phone, Lock } from "lucide-react";
+import { Phone, Lock, User } from "lucide-react";
+import axios from "axios";
+
+
+import { useUserStore } from "@/store/useUserStore";
 
 export default function LoginPage() {
-    const [phone, setPhone] = useState("");
-    const [password, setPassword] = useState("");
+    const setUser = useUserStore((state) => state.setUser);
+    const [formData, setFormData] = useState({
+        identifier: "",
+        password: ""
+    });
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        console.log("Login attempt:", { phone, password });
-        // Authentication logic will be implemented later
+    const [error, setError] = useState("");
+    const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(false);
+    const router = useRouter();
+    const searchParams = useSearchParams();
+
+    useEffect(() => {
+        const msg = searchParams.get("message");
+        if (msg) setMessage(msg);
+    }, [searchParams]);
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError("");
+        setMessage("");
+        setLoading(true);
+
+        try {
+            const { data } = await axios.post("/api/auth/login", formData);
+            if (data.token) {
+                localStorage.setItem("token", data.token);
+            }
+            setUser(data.user);
+            router.push("/");
+            router.refresh();
+        } catch (err) {
+            setError(err.response?.data?.error || "Something went wrong. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
     return (
-        <div className="min-h-screen bg-secondary flex flex-col justify-center py-0 sm:px-6 lg:px-8">
-            <div className="sm:mx-auto sm:w-full sm:max-w-md">
-                <Link href="/" className="flex items-center justify-center gap-2 text-primary hover:underline mb-6">
-                    <ArrowLeft size={16} /> Back to home
-                </Link>
-                <h2 className="text-center text-3xl font-heading font-extrabold text-foreground">
-                    Welcome back
-                </h2>
-                <p className="mt-2 text-center text-sm text-muted-foreground">
+        <div className="min-h-screen bg-secondary flex items-center justify-center p-4">
+            <div className="w-full max-w-md bg-white rounded-[3rem] p-8 md:p-12 shadow-xl">
+                <div className="text-center mb-10">
+                    <h1 className="text-4xl font-heading font-black mb-2">Welcome Back</h1>
+                    <p className="text-muted-foreground">Log in to your account</p>
+                </div>
+
+                {message && (
+                    <div className="bg-green-50 text-green-600 p-4 rounded-2xl mb-6 text-sm font-medium border border-green-100">
+                        {message}
+                    </div>
+                )}
+
+                {error && (
+                    <div className="bg-red-50 text-red-500 p-4 rounded-2xl mb-6 text-sm font-medium border border-red-100">
+                        {error}
+                    </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="space-y-4">
+                        <div className="relative">
+                            <User className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
+                            <input
+                                type="text"
+                                name="identifier"
+                                placeholder="Phone or Username"
+                                required
+                                value={formData.identifier}
+                                onChange={handleChange}
+                                className="w-full bg-secondary border-none rounded-2xl px-12 py-4 font-bold outline-none focus:ring-2 ring-primary transition-all"
+                            />
+                        </div>
+
+
+                        <div className="relative">
+                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
+                            <input
+                                type="password"
+                                name="password"
+                                placeholder="Password"
+                                required
+                                value={formData.password}
+                                onChange={handleChange}
+                                className="w-full bg-secondary border-none rounded-2xl px-12 py-4 font-bold outline-none focus:ring-2 ring-primary transition-all"
+                            />
+                        </div>
+                    </div>
+
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full btn-primary py-5 rounded-2xl text-lg mt-4 disabled:opacity-50"
+                    >
+                        {loading ? "Logging in..." : "Log In"}
+                    </button>
+                </form>
+
+                <div className="mt-8 text-center text-muted-foreground font-medium">
                     Don't have an account?{" "}
-                    <Link href="/signup" className="font-medium text-primary hover:underline">
-                        Sign up
+                    <Link href="/signup" className="text-primary font-bold hover:underline">
+                        Sign Up
                     </Link>
-                </p>
-            </div>
-
-            <div className="mt-4 sm:mx-auto sm:w-full sm:max-w-md">
-                <div className="bg-white py-8 px-4 shadow-sm sm:rounded-lg sm:px-10 border border-border">
-                    <form className="space-y-6" onSubmit={handleSubmit}>
-                        <div>
-                            <label htmlFor="phone" className="block text-sm font-bold text-foreground mb-1">
-                                Phone Number
-                            </label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
-                                    <Phone size={18} />
-                                </div>
-                                <input
-                                    id="phone"
-                                    name="phone"
-                                    type="tel"
-                                    autoComplete="tel"
-                                    required
-                                    value={phone}
-                                    onChange={(e) => setPhone(e.target.value)}
-                                    className="block w-full pl-10 pr-3 py-2 border border-border rounded-md shadow-sm placeholder-muted-foreground focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                                    placeholder="+251 91 111 2222"
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label htmlFor="password" className="block text-sm font-bold text-foreground mb-1">
-                                Password
-                            </label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
-                                    <Lock size={18} />
-                                </div>
-                                <input
-                                    id="password"
-                                    name="password"
-                                    type="password"
-                                    autoComplete="current-password"
-                                    required
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="block w-full pl-10 pr-3 py-2 border border-border rounded-md shadow-sm placeholder-muted-foreground focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                                    placeholder="Enter your password"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center">
-                                <input
-                                    id="remember-me"
-                                    name="remember-me"
-                                    type="checkbox"
-                                    className="h-4 w-4 text-primary focus:ring-primary border-border rounded"
-                                />
-                                <label htmlFor="remember-me" className="ml-2 block text-sm text-foreground">
-                                    Remember me
-                                </label>
-                            </div>
-
-                            <div className="text-sm">
-                                <Link href="#" className="font-medium text-primary hover:underline">
-                                    Forgot your password?
-                                </Link>
-                            </div>
-                        </div>
-
-                        <div>
-                            <button
-                                type="submit"
-                                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-primary hover:bg-[#d46d45] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
-                            >
-                                Sign in
-                            </button>
-                        </div>
-                    </form>
                 </div>
             </div>
         </div>
