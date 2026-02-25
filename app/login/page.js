@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Phone, Lock, User } from "lucide-react";
@@ -9,7 +9,7 @@ import axios from "axios";
 
 import { useUserStore } from "@/store/useUserStore";
 
-export default function LoginPage() {
+function Component() {
     const setUser = useUserStore((state) => state.setUser);
     const [formData, setFormData] = useState({
         identifier: "",
@@ -122,3 +122,11 @@ export default function LoginPage() {
         </div>
     );
 }
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <Component />
+        </Suspense>
+    )
+};
