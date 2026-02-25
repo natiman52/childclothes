@@ -28,14 +28,14 @@ export default function ShopPage() {
             return [{ id: "all", name: "All Products" }, ...data];
         }
     });
-
-    const filteredProducts = products
-        .filter(p => {
+    console.log(products);
+    const filteredProducts = products?.data
+        ?.filter(p => {
             if (selectedCategory === "All Products") return true;
             return p.categories.some(c => c.name === selectedCategory);
         })
-        .filter(p => p.basePrice <= priceRange)
-        .sort((a, b) => {
+        ?.filter(p => p.basePrice <= priceRange)
+        ?.sort((a, b) => {
             if (sortBy === "Price: Low to High") return a.basePrice - b.basePrice;
             if (sortBy === "Price: High to Low") return b.basePrice - a.basePrice;
             return new Date(b.createdAt) - new Date(a.createdAt);
@@ -170,7 +170,7 @@ export default function ShopPage() {
                         </div>
 
                         {filteredProducts.length > 0 ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+                            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-8">
                                 {filteredProducts.map((product) => (
                                     <ProductCard key={product.id} {...product} />
                                 ))}

@@ -12,7 +12,10 @@ export async function PUT(request, { params }) {
 
         const updatedCategory = await prisma.category.update({
             where: { id },
-            data: { name: body.name }
+            data: {
+                name: body.name,
+                imageUrl: body.imageUrl,
+            }
         });
 
         return NextResponse.json(updatedCategory);

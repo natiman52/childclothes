@@ -4,25 +4,41 @@ import { prisma } from "@/lib/prisma";
 export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const categoryId = searchParams.get("category");
+    const page = parseInt(searchParams.get("page")) || 1;
+    const limit = parseInt(searchParams.get("limit")) || 10;
+    const skip = (page - 1) * limit;
 
     try {
-        const products = await prisma.product.findMany({
-            where: categoryId ? {
-                categories: {
-                    some: { id: categoryId }
-                }
-            } : {},
-            include: {
-                images: true,
-                categories: true,
-                variations: true,
-                _count: {
-                    select: { ratings: true, questions: true }
-                }
-            },
-            orderBy: { createdAt: "desc" }
+        const where = categoryId ? {
+            categories: {
+                some: { id: categoryId }
+            }
+        } : {};
+
+        const [products, total] = await Promise.all([
+            prisma.product.findMany({
+                where,
+                include: {
+                    images: true,
+                    categories: true,
+                    variations: true,
+                    _count: {
+                        select: { ratings: true, questions: true }
+                    }
+                },
+                orderBy: { createdAt: "desc" },
+                skip,
+                take: limit,
+            }),
+            prisma.product.count({ where })
+        ]);
+
+        return NextResponse.json({
+            data: products,
+            total,
+            page,
+            pages: Math.ceil(total / limit)
         });
-        return NextResponse.json(products);
     } catch (error) {
         console.error("Fetch products error:", error);
         return NextResponse.json({ error: "Something went wrong" }, { status: 500 });

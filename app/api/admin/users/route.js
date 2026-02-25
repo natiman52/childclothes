@@ -1,19 +1,29 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function GET() {
+export async function GET(request) {
     try {
-        const users = await prisma.user.findMany({
-            include: {
-                _count: {
-                    select: { orders: true }
+        const { searchParams } = new URL(request.url);
+        const page = parseInt(searchParams.get("page")) || 1;
+        const limit = parseInt(searchParams.get("limit")) || 10;
+        const skip = (page - 1) * limit;
+
+        const [users, total] = await Promise.all([
+            prisma.user.findMany({
+                include: {
+                    _count: {
+                        select: { orders: true }
+                    },
+                    orders: {
+                        select: { totalPrice: true }
+                    }
                 },
-                orders: {
-                    select: { totalPrice: true }
-                }
-            },
-            orderBy: { createdAt: 'desc' }
-        });
+                orderBy: { createdAt: 'desc' },
+                skip,
+                take: limit,
+            }),
+            prisma.user.count()
+        ]);
 
         // Calculate total spent for each user
         const usersWithStats = users.map(user => {
@@ -25,7 +35,12 @@ export async function GET() {
             };
         });
 
-        return NextResponse.json(usersWithStats);
+        return NextResponse.json({
+            data: usersWithStats,
+            total,
+            page,
+            pages: Math.ceil(total / limit)
+        });
     } catch (error) {
         console.error("Error fetching admin users:", error);
         return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });

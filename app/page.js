@@ -34,7 +34,7 @@ export default function Home() {
     queryKey: ["featured-products"],
     queryFn: async () => {
       const { data } = await api.get("/products");
-      return data?.slice(0, 4) || [];
+      return data?.data?.slice(0, 4) || [];
     }
   });
   const { data: heroData } = useQuery({
@@ -89,7 +89,6 @@ export default function Home() {
 
     return () => ctx.revert();
   }, []);
-
   return (
     <div>
       <Hero
@@ -117,7 +116,7 @@ export default function Home() {
               >
                 <div className={`aspect-[4/5] ${categoryColors[index % categoryColors.length]} rounded-[2rem] overflow-hidden mb-4 transition-transform group-hover:scale-95 relative`}>
                   <Image
-                    src={categoryImages[index % categoryImages.length]}
+                    src={cat.imageUrl || categoryImages[index % categoryImages.length]}
                     alt={cat.name}
                     fill
                     className="object-cover mix-blend-multiply opacity-80"
@@ -138,7 +137,7 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
             <div>
-              <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-2">Made with love</p>
+              <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-2">በፍቅር ተዘጋጅቷል</p>
               <h2 className="text-4xl md:text-6xl font-heading font-black">Explore our <br /> collections</h2>
             </div>
             <Link href="/shop" className="btn-primary">
@@ -146,8 +145,8 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {products.map((product) => (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
+            {products?.map((product) => (
               <ProductCard key={product.id} {...product} />
             ))}
           </div>
@@ -161,18 +160,18 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
             <div className="space-y-4">
               <div className="text-5xl mb-6">🚚</div>
-              <h3 className="text-2xl font-heading font-bold">Fast Shipping</h3>
-              <p className="text-muted-foreground leading-relaxed">We ship all orders within 2-5 business days</p>
+              <h3 className="text-2xl font-heading font-bold">በፍጥነት አድራሽ</h3>
+              <p className="text-muted-foreground leading-relaxed">በ2-5 ሰዓት ውስጥ በፍጥነት ይደርሳል</p>
             </div>
             <div className="space-y-4">
               <div className="text-5xl mb-6">📦</div>
-              <h3 className="text-2xl font-heading font-bold">Free shipping</h3>
-              <p className="text-muted-foreground leading-relaxed">For all orders over ETB 5000</p>
+              <h3 className="text-2xl font-heading font-bold">በነፃ እናደርሳለን</h3>
+              <p className="text-muted-foreground leading-relaxed">ከ 5000ETB በላይ ለሆኑ ትዕዛዞች</p>
             </div>
             <div className="space-y-4">
               <div className="text-5xl mb-6">💌</div>
-              <h3 className="text-2xl font-heading font-bold">Happy to help you</h3>
-              <p className="text-muted-foreground leading-relaxed">Any question? We are happy to help you by telegram</p>
+              <h3 className="text-2xl font-heading font-bold">ለመርዳት ዝግጁ ነን</h3>
+              <p className="text-muted-foreground leading-relaxed">Any question? ይጠቀሙ በtelegram ያግኙን</p>
             </div>
           </div>
         </div>

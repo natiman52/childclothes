@@ -36,6 +36,7 @@ model Address {
 model Category {
   id       String    @id @default(cuid())
   name     String    @unique
+  imageUrl String?
   products Product[] @relation("ProductToCategory")
 }
 

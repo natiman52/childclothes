@@ -7,18 +7,22 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/api";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import Image from "next/image";
+import Pagination from "@/components/Pagination";
 
 export default function AdminProductsPage() {
     const router = useRouter();
     const queryClient = useQueryClient();
+    const [page, setPage] = useState(1);
 
-    const { data: products = [], isLoading } = useQuery({
-        queryKey: ["admin-products"],
+    const { data: productData = { data: [], total: 0, pages: 0 }, isLoading } = useQuery({
+        queryKey: ["admin-products", page],
         queryFn: async () => {
-            const { data } = await api.get("/products");
+            const { data } = await api.get(`/products?page=${page}`);
             return data;
         }
     });
+
+    const products = productData.data;
 
     const deleteMutation = useMutation({
         mutationFn: async (id) => {
@@ -38,7 +42,7 @@ export default function AdminProductsPage() {
     };
 
     if (isLoading) return <LoadingSpinner />;
-
+    console.log(productData);
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border pb-6">
@@ -128,14 +132,14 @@ export default function AdminProductsPage() {
                 </table>
             </div>
 
-            <div className="p-4 flex justify-center mt-6 text-sm">
-                <div className="flex gap-2">
-                    <button className="px-4 py-2 bg-white border border-border rounded-xl text-muted-foreground hover:bg-secondary transition-colors font-bold">Prev</button>
-                    <button className="px-4 py-2 bg-primary text-white rounded-xl font-bold">1</button>
-                    <button className="px-4 py-2 bg-white border border-border rounded-xl text-muted-foreground hover:bg-secondary transition-colors font-bold">2</button>
-                    <button className="px-4 py-2 bg-white border border-border rounded-xl text-muted-foreground hover:bg-secondary transition-colors font-bold">Next</button>
-                </div>
-            </div>
+            <Pagination
+                currentPage={productData.page || 1}
+                totalPages={productData.pages || 1}
+                onPageChange={(newPage) => {
+                    setPage(newPage);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+            />
         </div>
     );
 }

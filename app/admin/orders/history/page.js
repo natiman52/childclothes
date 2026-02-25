@@ -5,18 +5,23 @@ import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import Pagination from "@/components/Pagination";
 
 export default function OrderHistoryPage() {
     const router = useRouter();
-    const { data: orders = [], isLoading } = useQuery({
-        queryKey: ["admin-orders-history"],
+    const [page, setPage] = useState(1);
+
+    const { data: orderData = { data: [], total: 0, pages: 0 }, isLoading } = useQuery({
+        queryKey: ["admin-orders-history", page],
         queryFn: async () => {
-            const { data } = await api.get("/admin/orders");
-            // Filter only delivered and returned orders
-            return data.filter(order => order.status === "DELIVERED" || order.status === "RETURNED");
+            const { data } = await api.get(`/admin/orders?status=HISTORY&page=${page}`);
+            return data;
         },
         refetchInterval: 60000
     });
+
+    const orders = orderData.data;
 
     if (isLoading) return <LoadingSpinner />;
 
@@ -86,6 +91,15 @@ export default function OrderHistoryPage() {
                     </table>
                 </div>
             </div>
+
+            <Pagination
+                currentPage={orderData.page || 1}
+                totalPages={orderData.pages || 1}
+                onPageChange={(newPage) => {
+                    setPage(newPage);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+            />
         </div>
     );
 }

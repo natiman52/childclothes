@@ -1,16 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Search, Edit, Trash2, Tag, Check, X } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Tag, Check, X, Image as ImageIcon, Link as LinkIcon, Upload } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/api";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { UploadButton } from "@/app/utils/uploadthing";
 
 export default function AdminCategoriesPage() {
     const [editingId, setEditingId] = useState(null);
     const [editName, setEditName] = useState("");
+    const [editImageUrl, setEditImageUrl] = useState("");
+    const [editImageSource, setEditImageSource] = useState("url"); // "url" or "upload"
+
     const [isAdding, setIsAdding] = useState(false);
     const [newName, setNewName] = useState("");
+    const [newImageUrl, setNewImageUrl] = useState("");
+    const [newImageSource, setNewImageSource] = useState("url"); // "url" or "upload"
 
     const queryClient = useQueryClient();
 
@@ -25,14 +31,15 @@ export default function AdminCategoriesPage() {
 
     // Create Category Mutation
     const createMutation = useMutation({
-        mutationFn: async (name) => {
-            const { data } = await api.post("/admin/categories", { name });
+        mutationFn: async ({ name, imageUrl }) => {
+            const { data } = await api.post("/admin/categories", { name, imageUrl });
             return data;
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["admin-categories"] });
             queryClient.invalidateQueries({ queryKey: ["categories"] });
             setNewName("");
+            setNewImageUrl("");
             setIsAdding(false);
         },
         onError: (error) => {
@@ -42,8 +49,8 @@ export default function AdminCategoriesPage() {
 
     // Update Category Mutation
     const updateMutation = useMutation({
-        mutationFn: async ({ id, name }) => {
-            const { data } = await api.put(`/admin/categories/${id}`, { name });
+        mutationFn: async ({ id, name, imageUrl }) => {
+            const { data } = await api.put(`/admin/categories/${id}`, { name, imageUrl });
             return data;
         },
         onSuccess: () => {
@@ -51,6 +58,7 @@ export default function AdminCategoriesPage() {
             queryClient.invalidateQueries({ queryKey: ["categories"] });
             setEditingId(null);
             setEditName("");
+            setEditImageUrl("");
         },
         onError: (error) => {
             alert(error.response?.data?.error || "Failed to update category");
@@ -73,12 +81,12 @@ export default function AdminCategoriesPage() {
 
     const handleCreate = () => {
         if (!newName.trim()) return;
-        createMutation.mutate(newName);
+        createMutation.mutate({ name: newName, imageUrl: newImageUrl });
     };
 
     const handleUpdate = (id) => {
         if (!editName.trim()) return;
-        updateMutation.mutate({ id, name: editName });
+        updateMutation.mutate({ id, name: editName, imageUrl: editImageUrl });
     };
 
     const handleDelete = (id) => {
@@ -125,10 +133,75 @@ export default function AdminCategoriesPage() {
                                             type="text"
                                             value={newName}
                                             onChange={(e) => setNewName(e.target.value)}
-                                            placeholder="New Category Name"
+                                            placeholder="Category Name"
                                             className="w-full bg-white border border-border rounded-lg px-3 py-2 text-sm font-bold outline-none focus:ring-2 ring-primary mb-3"
                                             autoFocus
                                         />
+
+                                        {/* Image Selection Section */}
+                                        <div className="mb-4 space-y-3 p-3 bg-white rounded-xl border border-border">
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => setNewImageSource("url")}
+                                                    className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-bold transition-colors ${newImageSource === "url" ? "bg-primary text-white" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}
+                                                >
+                                                    <LinkIcon size={14} /> URL
+                                                </button>
+                                                <button
+                                                    onClick={() => setNewImageSource("upload")}
+                                                    className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-bold transition-colors ${newImageSource === "upload" ? "bg-primary text-white" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}
+                                                >
+                                                    <Upload size={14} /> Upload
+                                                </button>
+                                            </div>
+
+                                            {newImageSource === "url" ? (
+                                                <input
+                                                    type="url"
+                                                    value={newImageUrl}
+                                                    onChange={(e) => setNewImageUrl(e.target.value)}
+                                                    placeholder="Image URL"
+                                                    className="w-full bg-white border border-border rounded-lg px-3 py-1.5 text-xs font-bold outline-none focus:ring-2 ring-primary"
+                                                />
+                                            ) : (
+                                                <div className="flex justify-center py-1">
+                                                    <UploadButton
+                                                        endpoint="imageUploader"
+                                                        headers={() => {
+                                                            const token = localStorage.getItem("token");
+                                                            return token ? { Authorization: `Bearer ${token}` } : {};
+                                                        }}
+                                                        onClientUploadComplete={(res) => {
+                                                            setNewImageUrl(res[0].url);
+                                                            alert("Image uploaded successfully!");
+                                                        }}
+                                                        onUploadError={(error) => {
+                                                            alert(`ERROR! ${error.message}`);
+                                                        }}
+                                                        appearance={{
+                                                            button: "bg-primary hover:bg-primary/90 text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors cursor-pointer w-full h-auto",
+                                                            allowedContent: "hidden"
+                                                        }}
+                                                        content={{
+                                                            button: newImageUrl ? "Replace Image" : "Upload Image"
+                                                        }}
+                                                    />
+                                                </div>
+                                            )}
+
+                                            {newImageUrl && (
+                                                <div className="relative aspect-video rounded-lg overflow-hidden border border-border">
+                                                    <img src={newImageUrl} alt="Preview" className="w-full h-full object-cover" />
+                                                    <button
+                                                        onClick={() => setNewImageUrl("")}
+                                                        className="absolute top-1 right-1 p-1 bg-white/80 hover:bg-white text-red-500 rounded-md shadow-sm transition-colors"
+                                                    >
+                                                        <X size={14} />
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={handleCreate}
@@ -138,7 +211,7 @@ export default function AdminCategoriesPage() {
                                                 <Check size={16} /> Save
                                             </button>
                                             <button
-                                                onClick={() => { setIsAdding(false); setNewName(""); }}
+                                                onClick={() => { setIsAdding(false); setNewName(""); setNewImageUrl(""); }}
                                                 className="flex-1 bg-secondary text-foreground py-2 rounded-lg text-sm font-bold hover:bg-secondary/80 transition-colors flex justify-center items-center gap-1"
                                             >
                                                 <X size={16} /> Cancel
@@ -154,8 +227,12 @@ export default function AdminCategoriesPage() {
                             ) : categories.map((category) => (
                                 <div key={category.id} className="p-6 border-b md:border-b-0 lg:border-r border-border last:border-0 hover:bg-secondary/10 transition-colors flex flex-col justify-between group h-full">
                                     <div className="flex items-start justify-between mb-4">
-                                        <div className="w-12 h-12 bg-secondary text-muted-foreground group-hover:bg-primary group-hover:text-white transition-colors rounded-xl flex items-center justify-center">
-                                            <Tag size={24} />
+                                        <div className="w-12 h-12 bg-secondary text-muted-foreground group-hover:bg-primary group-hover:text-white transition-all rounded-xl flex items-center justify-center overflow-hidden border border-border">
+                                            {category.imageUrl ? (
+                                                <img src={category.imageUrl} alt={category.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <Tag size={24} />
+                                            )}
                                         </div>
                                         <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                             {editingId === category.id ? (
@@ -166,7 +243,12 @@ export default function AdminCategoriesPage() {
                                             ) : (
                                                 <>
                                                     <button
-                                                        onClick={() => { setEditingId(category.id); setEditName(category.name); }}
+                                                        onClick={() => {
+                                                            setEditingId(category.id);
+                                                            setEditName(category.name);
+                                                            setEditImageUrl(category.imageUrl || "");
+                                                            setEditImageSource("url");
+                                                        }}
                                                         className="p-1.5 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors"
                                                     >
                                                         <Edit size={16} />
@@ -184,13 +266,75 @@ export default function AdminCategoriesPage() {
                                     </div>
                                     <div>
                                         {editingId === category.id ? (
-                                            <input
-                                                type="text"
-                                                value={editName}
-                                                onChange={(e) => setEditName(e.target.value)}
-                                                className="w-full bg-white border border-border rounded-lg px-3 py-1.5 text-lg font-black font-heading outline-none focus:ring-2 ring-primary mb-1"
-                                                autoFocus
-                                            />
+                                            <div className="space-y-3">
+                                                <input
+                                                    type="text"
+                                                    value={editName}
+                                                    onChange={(e) => setEditName(e.target.value)}
+                                                    className="w-full bg-white border border-border rounded-lg px-3 py-1.5 text-lg font-black font-heading outline-none focus:ring-2 ring-primary"
+                                                    autoFocus
+                                                />
+
+                                                {/* Edit Image Selection */}
+                                                <div className="space-y-2 p-3 bg-white rounded-xl border border-border">
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            onClick={() => setEditImageSource("url")}
+                                                            className={`flex-1 flex items-center justify-center gap-1 py-1 rounded-md text-[10px] font-bold transition-colors ${editImageSource === "url" ? "bg-primary text-white" : "bg-secondary text-muted-foreground"}`}
+                                                        >
+                                                            <LinkIcon size={12} /> URL
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setEditImageSource("upload")}
+                                                            className={`flex-1 flex items-center justify-center gap-1 py-1 rounded-md text-[10px] font-bold transition-colors ${editImageSource === "upload" ? "bg-primary text-white" : "bg-secondary text-muted-foreground"}`}
+                                                        >
+                                                            <Upload size={12} /> Upload
+                                                        </button>
+                                                    </div>
+
+                                                    {editImageSource === "url" ? (
+                                                        <input
+                                                            type="url"
+                                                            value={editImageUrl}
+                                                            onChange={(e) => setEditImageUrl(e.target.value)}
+                                                            placeholder="Image URL"
+                                                            className="w-full bg-white border border-border rounded-lg px-2 py-1 text-xs font-bold outline-none focus:ring-2 ring-primary"
+                                                        />
+                                                    ) : (
+                                                        <div className="flex justify-center">
+                                                            <UploadButton
+                                                                endpoint="imageUploader"
+                                                                onClientUploadComplete={(res) => {
+                                                                    setEditImageUrl(res[0].url);
+                                                                    alert("Image uploaded successfully!");
+                                                                }}
+                                                                onUploadError={(error) => {
+                                                                    alert(`ERROR! ${error.message}`);
+                                                                }}
+                                                                appearance={{
+                                                                    button: "bg-primary hover:bg-primary/90 text-white text-[10px] font-bold px-2 py-1.5 rounded-md transition-colors cursor-pointer w-full h-auto",
+                                                                    allowedContent: "hidden"
+                                                                }}
+                                                                content={{
+                                                                    button: editImageUrl ? "Replace" : "Upload"
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    )}
+
+                                                    {editImageUrl && (
+                                                        <div className="relative aspect-video rounded-md overflow-hidden border border-border">
+                                                            <img src={editImageUrl} alt="Preview" className="w-full h-full object-cover" />
+                                                            <button
+                                                                onClick={() => setEditImageUrl("")}
+                                                                className="absolute top-0.5 right-0.5 p-0.5 bg-white/80 hover:bg-white text-red-500 rounded shadow-xs transition-colors"
+                                                            >
+                                                                <X size={10} />
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
                                         ) : (
                                             <h3 className="font-heading font-black text-xl mb-1">{category.name}</h3>
                                         )}

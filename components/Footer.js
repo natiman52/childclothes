@@ -8,13 +8,13 @@ export default function Footer() {
                 {/* Support Section */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
                     <div className="flex flex-col items-center md:items-start text-center md:text-left">
-                        <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-4">Got a question?</h3>
+                        <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-4">ጥያቄ አሎት?</h3>
                         <Link href="/faq" className="text-xl font-heading font-bold flex items-center gap-2 hover:text-primary transition-colors">
                             Read our FAQ <ArrowRight size={20} className="text-primary" />
                         </Link>
                     </div>
                     <div className="flex flex-col items-center text-center">
-                        <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-4">Customer support</h3>
+                        <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-4">የደንበኛ ድጋፍ</h3>
                         <p className="text-xl font-heading font-bold">+251 97 269 2781</p>
                     </div>
                     {/* <div className="flex flex-col items-center md:items-end text-center md:text-right">
@@ -33,7 +33,7 @@ export default function Footer() {
                             ሰላም ልብስ
                         </Link>
                         <p className="text-muted-foreground mb-6">
-                            Premium kids clothing designed for comfort and style. Every piece is crafted with love for your little ones.
+                            ፕሪሚየም የልጆች ልብስ ለምቾት እና ለቅጥነት የተነደፈ። እያንዳንዱ ክፍል ለትንንሽ ልጆቻችሁ በፍቅር ተዘጋጅቷል
                         </p>
                         <div className="flex gap-4">
                             <Link href="#" className="hover:text-primary transition-colors border border-secondary p-2 rounded-full"><Instagram size={20} /></Link>

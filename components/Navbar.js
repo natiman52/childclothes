@@ -35,7 +35,7 @@ export default function Navbar() {
                 <div className="hidden sm:flex flex-1 max-w-xl relative">
                     <input
                         type="text"
-                        placeholder="Search here"
+                        placeholder="ይፈልጉ"
                         className="w-full bg-secondary border-none rounded-full py-2 px-6 pl-12 focus:ring-2 focus:ring-primary outline-none transition-all"
                     />
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />

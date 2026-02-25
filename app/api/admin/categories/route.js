@@ -11,6 +11,7 @@ export async function POST(request) {
         const newCategory = await prisma.category.create({
             data: {
                 name: body.name,
+                imageUrl: body.imageUrl,
             }
         });
 

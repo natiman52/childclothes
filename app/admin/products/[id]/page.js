@@ -334,7 +334,14 @@ export default function AdminProductDetailPage() {
                                     <div className="flex flex-wrap gap-1">
                                         {selectedFiles.map((file, idx) => (
                                             <div key={idx} className="h-35 aspect-square bg-blue-50 rounded-xl border border-blue-200 flex items-center justify-center relative group overflow-hidden">
-                                                <div className="text-xs font-bold text-blue-600 px-2 text-center uppercase truncate w-full">{file.name}</div>
+                                                <img
+                                                    src={URL.createObjectURL(file)}
+                                                    alt={file.name}
+                                                    className="h-full w-full object-cover"
+                                                />
+                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                    <p className="text-[10px] text-white font-bold uppercase truncate px-2">{file.name}</p>
+                                                </div>
                                                 <button
                                                     onClick={() => handleRemoveSelectedFile(idx)}
                                                     className="absolute top-2 right-2 p-1.5 bg-white text-red-500 rounded-md shadow-sm opacity-100 transition-opacity z-10 hover:scale-105"

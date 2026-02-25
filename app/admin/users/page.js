@@ -7,16 +7,21 @@ import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import Image from "next/image";
+import Pagination from "@/components/Pagination";
 
 export default function AdminUsersPage() {
     const router = useRouter();
-    const { data: users = [], isLoading } = useQuery({
-        queryKey: ["admin-users"],
+    const [page, setPage] = useState(1);
+
+    const { data: userData = { data: [], total: 0, pages: 0 }, isLoading } = useQuery({
+        queryKey: ["admin-users", page],
         queryFn: async () => {
-            const { data } = await api.get("/admin/users");
+            const { data } = await api.get(`/admin/users?page=${page}`);
             return data;
         }
     });
+
+    const users = userData.data;
 
     if (isLoading) return <LoadingSpinner />;
     return (
@@ -106,15 +111,18 @@ export default function AdminUsersPage() {
                 </div>
 
                 <div className="p-4 border-t border-border flex justify-between items-center text-sm text-muted-foreground font-bold">
-                    <span>Showing {users.length} entries</span>
-                    <div className="flex gap-2">
-                        <button className="px-3 py-1 border border-border rounded-lg hover:bg-secondary">Prev</button>
-                        <button className="px-3 py-1 bg-primary text-white rounded-lg">1</button>
-                        <button className="px-3 py-1 border border-border rounded-lg hover:bg-secondary">2</button>
-                        <button className="px-3 py-1 border border-border rounded-lg hover:bg-secondary">Next</button>
-                    </div>
+                    <span>Showing {users.length} of {userData.total} entries</span>
                 </div>
             </div>
+
+            <Pagination
+                currentPage={userData.page || 1}
+                totalPages={userData.pages || 1}
+                onPageChange={(newPage) => {
+                    setPage(newPage);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+            />
         </div>
     );
 }
