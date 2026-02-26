@@ -9,18 +9,21 @@ import axios from "axios";
 export default function CategoryPage() {
     const { slug } = useParams();
     const decodedSlug = typeof slug === 'string' ? decodeURIComponent(slug) : String(slug);
+    const categoryName = decodedSlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
-    const { data: products = [], isLoading } = useQuery({
-        queryKey: ["products"],
+    const { data: productsData = { data: [] }, isLoading } = useQuery({
+        queryKey: ["products", categoryName],
         queryFn: async () => {
-            const { data } = await axios.get("/api/products");
+            const { data } = await axios.get("/api/products", {
+                params: {
+                    categoryName: categoryName
+                }
+            });
             return data;
         }
     });
 
-    const filteredProducts = products.filter(p => p.categories?.some(c => c.name.toLowerCase() === decodedSlug.toLowerCase()));
-
-    const categoryName = decodedSlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    const filteredProducts = productsData.data;
 
     if (isLoading) return <LoadingSpinner />;
 
@@ -34,7 +37,7 @@ export default function CategoryPage() {
             </div>
 
             <div className="container mx-auto px-4 py-20">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-8">
                     {filteredProducts.map((product) => (
                         <ProductCard key={product.id} {...product} />
                     ))}

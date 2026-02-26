@@ -114,7 +114,7 @@ export default function ProductDetailPage() {
                     <ChevronLeft size={20} /> Back to previous
                 </button>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-24">
+                <div className="grid grid-cols-1 grid-cols-[1fr_2fr] gap-12 xl:gap-24">
                     {/* Image Gallery */}
                     <div className="space-y-4">
                         <div className="aspect-square relative bg-[#f7f7f7] rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-sm">

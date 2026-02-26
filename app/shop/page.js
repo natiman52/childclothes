@@ -1,24 +1,46 @@
 "use client"
 import { useQuery } from "@tanstack/react-query";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Filter, X, ChevronDown } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
+import { useShopStore } from "@/store/useShopStore";
+import Pagination from "@/components/Pagination";
+
 export default function ShopPage() {
     const [selectedCategory, setSelectedCategory] = useState("All Products");
     const [priceRange, setPriceRange] = useState(10000);
     const [sortBy, setSortBy] = useState("Latest");
+    const [page, setPage] = useState(1);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [axios] = useState(() => require("axios").default);
+    const { searchQuery } = useShopStore();
+
+    // Reset page when filters or search change
+    useEffect(() => {
+        setPage(1);
+    }, [selectedCategory, priceRange, sortBy, searchQuery]);
 
     // Fetch Products
-    const { data: products = [], isLoading: isProductsLoading } = useQuery({
-        queryKey: ["products"],
+    const { data: productsData = { data: [], total: 0, pages: 1 }, isLoading: isProductsLoading } = useQuery({
+        queryKey: ["products", selectedCategory, priceRange, sortBy, searchQuery, page],
         queryFn: async () => {
-            const { data } = await axios.get("/api/products");
+            const { data } = await axios.get("/api/products", {
+                params: {
+                    categoryName: selectedCategory === "All Products" ? undefined : selectedCategory,
+                    maxPrice: priceRange,
+                    sortBy: sortBy,
+                    search: searchQuery || undefined,
+                    page: page,
+                    limit: 12
+                }
+            });
             return data;
-        }
+        },
+        keepPreviousData: true
     });
+
+    const products = productsData.data;
 
     // Fetch Categories
     const { data: categories = [], isLoading: isCategoriesLoading } = useQuery({
@@ -28,24 +50,12 @@ export default function ShopPage() {
             return [{ id: "all", name: "All Products" }, ...data];
         }
     });
-    console.log(products);
-    const filteredProducts = products?.data
-        ?.filter(p => {
-            if (selectedCategory === "All Products") return true;
-            return p.categories.some(c => c.name === selectedCategory);
-        })
-        ?.filter(p => p.basePrice <= priceRange)
-        ?.sort((a, b) => {
-            if (sortBy === "Price: Low to High") return a.basePrice - b.basePrice;
-            if (sortBy === "Price: High to Low") return b.basePrice - a.basePrice;
-            return new Date(b.createdAt) - new Date(a.createdAt);
-        });
+
+    const filteredProducts = products;
 
     if (isProductsLoading || isCategoriesLoading) {
         return <LoadingSpinner />;
     }
-
-
 
     return (
         <div className="bg-white min-h-screen">
@@ -67,7 +77,7 @@ export default function ShopPage() {
                     {isFilterOpen ? "Hide Filters" : "Show Filters"}
                 </button>
                 <div className="text-xs font-bold text-muted-foreground">
-                    {filteredProducts.length} items
+                    {productsData.total} items
                 </div>
             </div>
 
@@ -151,7 +161,10 @@ export default function ShopPage() {
                     {/* Grid */}
                     <div className="flex-1">
                         <div className="flex flex-col sm:flex-row justify-between items-center mb-12 gap-6">
-                            <p className="hidden md:block text-muted-foreground font-medium">Showing {filteredProducts.length} results</p>
+                            <div className="flex flex-col capitalize">
+                                <p className="hidden md:block text-muted-foreground font-medium">Showing {filteredProducts.length} of {productsData.total} results</p>
+                                {searchQuery && <p className="text-sm font-bold text-primary mt-1">Search results for: "{searchQuery}"</p>}
+                            </div>
                             <div className="w-full sm:w-auto flex items-center gap-4">
                                 <span className="text-sm font-bold text-muted-foreground whitespace-nowrap">Sort by:</span>
                                 <div className="relative flex-1 sm:flex-none">
@@ -170,16 +183,23 @@ export default function ShopPage() {
                         </div>
 
                         {filteredProducts.length > 0 ? (
-                            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-8">
-                                {filteredProducts.map((product) => (
-                                    <ProductCard key={product.id} {...product} />
-                                ))}
-                            </div>
+                            <>
+                                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-8">
+                                    {filteredProducts.map((product) => (
+                                        <ProductCard key={product.id} {...product} />
+                                    ))}
+                                </div>
+                                <Pagination
+                                    currentPage={page}
+                                    totalPages={productsData.pages}
+                                    onPageChange={setPage}
+                                />
+                            </>
                         ) : (
                             <div className="text-center py-24 bg-secondary rounded-[3rem]">
                                 <p className="text-2xl font-bold opacity-30 px-6">No products match your filters</p>
                                 <button
-                                    onClick={() => { setSelectedCategory("All Products"); setPriceRange(100); }}
+                                    onClick={() => { setSelectedCategory("All Products"); setPriceRange(10000); }}
                                     className="mt-6 btn-primary px-8"
                                 >
                                     Reset filters

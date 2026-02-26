@@ -63,6 +63,10 @@ export default function AdminHeroPage() {
         },
         onUploadError: (error) => {
             alert(`Upload failed: ${error.message}`);
+        },
+        headers: () => {
+            const token = localStorage.getItem("token");
+            return token ? { Authorization: `Bearer ${token}` } : {};
         }
     });
 

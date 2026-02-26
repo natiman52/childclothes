@@ -4,16 +4,47 @@ import { prisma } from "@/lib/prisma";
 export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const categoryId = searchParams.get("category");
+    const categoryName = searchParams.get("categoryName");
+    const search = searchParams.get("search");
+    const minPrice = parseFloat(searchParams.get("minPrice")) || 0;
+    const maxPrice = parseFloat(searchParams.get("maxPrice")) || 1000000;
+    const sortBy = searchParams.get("sortBy") || "Latest";
+
     const page = parseInt(searchParams.get("page")) || 1;
-    const limit = parseInt(searchParams.get("limit")) || 10;
+    const limit = parseInt(searchParams.get("limit")) || 32; // Increased limit for shop
     const skip = (page - 1) * limit;
 
     try {
-        const where = categoryId ? {
-            categories: {
-                some: { id: categoryId }
+        let where = {
+            basePrice: {
+                gte: minPrice,
+                lte: maxPrice
             }
-        } : {};
+        };
+
+        if (search) {
+            where.OR = [
+                { name: { contains: search } },
+                { description: { contains: search } }
+            ];
+        }
+
+        if (categoryId) {
+            where.categories = {
+                some: { id: categoryId }
+            };
+        } else if (categoryName && categoryName !== "All Products") {
+            where.categories = {
+                some: { name: categoryName }
+            };
+        }
+
+        let orderBy = { createdAt: "desc" };
+        if (sortBy === "Price: Low to High") {
+            orderBy = { basePrice: "asc" };
+        } else if (sortBy === "Price: High to Low") {
+            orderBy = { basePrice: "desc" };
+        }
 
         const [products, total] = await Promise.all([
             prisma.product.findMany({
@@ -26,7 +57,7 @@ export async function GET(req) {
                         select: { ratings: true, questions: true }
                     }
                 },
-                orderBy: { createdAt: "desc" },
+                orderBy,
                 skip,
                 take: limit,
             }),

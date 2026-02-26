@@ -2,17 +2,19 @@
 import { useState, useEffect } from "react";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Search, Heart, User, ShoppingBag, Menu, X, ShieldCheck } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import CartDrawer from "./CartDrawer";
-
 import { useUserStore } from "@/store/useUserStore";
+import { useShopStore } from "@/store/useShopStore";
 
 export default function Navbar() {
     const { cartCount, setIsCartOpen } = useCart();
     const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const user = useUserStore((state) => state.user);
-
+    const { user } = useUserStore();
+    const { searchQuery, setSearchQuery } = useShopStore();
+    const router = useRouter();
 
     console.log(user);
     return (
@@ -36,6 +38,15 @@ export default function Navbar() {
                     <input
                         type="text"
                         placeholder="ይፈልጉ"
+                        value={searchQuery}
+                        onChange={(e) => {
+                            setSearchQuery(e.target.value)
+                        }}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                router.push("/shop")
+                            }
+                        }}
                         className="w-full bg-secondary border-none rounded-full py-2 px-6 pl-12 focus:ring-2 focus:ring-primary outline-none transition-all"
                     />
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
@@ -49,9 +60,6 @@ export default function Navbar() {
                             <span className="text-xs font-black uppercase tracking-tight hidden md:block">Admin</span>
                         </Link>
                     )}
-                    <button className="p-2 hover:bg-secondary rounded-full border border-secondary transition-colors hidden md:block">
-                        <Heart size={20} />
-                    </button>
                     <Link href={user ? "/profile" : "/login"} className="p-2 hover:bg-secondary rounded-full border border-secondary transition-colors">
                         <User size={20} />
                     </Link>
@@ -76,6 +84,8 @@ export default function Navbar() {
                     <input
                         type="text"
                         placeholder="Search our collection..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full bg-secondary border-none rounded-full py-3 px-6 pl-12 focus:ring-2 focus:ring-primary outline-none transition-all"
                         autoFocus={isSearchOpen}
                     />
